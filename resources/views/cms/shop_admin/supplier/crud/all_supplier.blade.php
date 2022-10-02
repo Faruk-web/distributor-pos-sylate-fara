@@ -7,10 +7,10 @@
     <div class="block block-rounded">
         <div class="row p-2">
             <div class="col-md-4">
-                <h4 class="">Product Suppliers</h4>
+                <h4 class="">Product Companies</h4>
             </div>
              @if($user->hasPermissionTo('supplier.add') || $user->type == 'owner')
-            <div class="col-md-3 text-right"><button type="button" class="btn btn-rounded btn-info btn-sm push" data-toggle="modal" data-target="#modal-block-fadein">Add New Supplier</button></div>
+            <div class="col-md-3 text-right"><button type="button" class="btn btn-rounded btn-info btn-sm push" data-toggle="modal" data-target="#modal-block-fadein">Add New Company</button></div>
             <div class="col-md-2 text-right">
                 <div class="dropdown push">
                     <button type="button" class="btn btn-light btn-sm dropdown-toggle" id="dropdown-content-rich-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Bulk Upload</button>
@@ -31,7 +31,7 @@
             </div>
             <div class="col-md-3 text-right">
                 <a href="{{route('download.demo.file', ['file_name'=>'supplier-demo.csv'])}}" class="btn btn-rounded btn-primary btn-sm">Download Demo CSV</a>
-                <a href="{{route('admin.download.exist.supplier')}}" class="btn btn-rounded btn-success btn-sm mt-1">Download Exist supplier</a>
+                <a href="{{route('admin.download.exist.supplier')}}" class="btn btn-rounded btn-success btn-sm mt-1">Download Exist Company</a>
             </div>
             @endif
         </div>
@@ -41,7 +41,6 @@
                     <thead>
                         <tr>
                             <th>Company Name</th>
-                            <th>Supplier Name</th>
                             <th>Code</th>
                             <th>Phone</th>
                             <th>Address</th>
@@ -52,7 +51,6 @@
                     <tbody>
                         @foreach($suppliers as $supplier)
                             <tr>
-                                <td>{{$supplier->company_name}}</td>
                                 <td>{{$supplier->name}}</td>
                                 <td>{{$supplier->code}}</td>
                                 <td>{{$supplier->phone}}</td>
@@ -94,7 +92,7 @@
                     <form action="{{route('suppliers.create.supplier')}}" method="post" id="form_1">
                         @csrf
                         <div class="block-header bg-primary-dark">
-                            <h3 class="block-title text-light">Add New Supplier</h3>
+                            <h3 class="block-title text-light">Add New Company</h3>
                             <div class="block-options">
                                 <button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close">
                                     <i class="fa fa-fw fa-times"></i>
@@ -103,33 +101,35 @@
                         </div>
                         <div class="block-content font-size-sm">
                             <div class="row">
-                                <div class="col-md-12">
+                                
+                                <div class="col-md-12 d-none">
                                     <div class="form-group">
                                         <label for="example-text-input"> <span class="text-danger">*</span> Company Name</label>
-                                        <input type="text" class="form-control" id="" value="{{ old('company_name') }}" required name="company_name">
+                                        <input type="text" class="form-control" id="" value="none" required name="company_name">
                                     </div>
                                 </div>
+                                
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label for="example-text-input"><span class="text-danger">*</span>Supplier Name</label>
+                                        <label for="example-text-input"><span class="text-danger">*</span>Company Name</label>
                                         <input type="text" class="form-control" value="{{ old('name') }}" id="" required name="name">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="example-text-input"><span class="text-danger">*</span>Supplier Phone</label>
+                                        <label for="example-text-input"><span class="text-danger">*</span>Company Phone</label>
                                         <input type="text" class="form-control" value="{{ old('phone') }}" id="" required name="phone">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="example-text-input">Supplier Email</label>
+                                        <label for="example-text-input">Company Email</label>
                                         <input type="text" class="form-control" value="{{ old('email') }}" id="" name="email">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="example-text-input">Supplier address</label>
+                                        <label for="example-text-input">Company address</label>
                                         <input type="text" class="form-control" value="{{ old('address') }}" id="" name="address">
                                     </div>
                                 </div>

@@ -76,6 +76,7 @@
                                     </select>
                                 </div>
                             </div>
+                            {{--
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="d-block">Online Sell Status</label>
@@ -128,6 +129,7 @@
                                     </div>
                                 </div>
                             </div>
+                            --}}
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="d-block">Default Printer</label>

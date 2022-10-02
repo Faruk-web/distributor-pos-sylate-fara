@@ -121,58 +121,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="d-block">Online Sell Status</label>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-success">
-                                        <input type="radio" class="custom-control-input" id="online_sell_status_yes" value="yes" required name="online_sell_status">
-                                        <label class="custom-control-label" for="online_sell_status_yes">Yes</label>
-                                    </div>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-danger">
-                                        <input type="radio" class="custom-control-input" id="online_sell_status_no" value="no" name="online_sell_status">
-                                        <label class="custom-control-label" for="online_sell_status_no">No</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="d-block">Sell Note Status</label>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-success">
-                                        <input type="radio" class="custom-control-input" id="sell_note_yes" value="yes" required name="sell_note">
-                                        <label class="custom-control-label" for="sell_note_yes">Yes</label>
-                                    </div>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-danger">
-                                        <input type="radio" class="custom-control-input" id="sell_note_no" value="no" name="sell_note">
-                                        <label class="custom-control-label" for="sell_note_no">No</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="d-block">Others Charge Status</label>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-success">
-                                        <input type="radio" class="custom-control-input" id="others_charge_yes" value="yes" required name="others_charge">
-                                        <label class="custom-control-label" for="others_charge_yes">Yes</label>
-                                    </div>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-danger">
-                                        <input type="radio" class="custom-control-input" id="others_charge_no" value="no" name="others_charge">
-                                        <label class="custom-control-label" for="others_charge_no">No</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="d-block">Send SMS Status</label>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-success">
-                                        <input type="radio" class="custom-control-input" id="sms_status_yes" value="yes" required name="sms_status">
-                                        <label class="custom-control-label" for="sms_status_yes">Yes</label>
-                                    </div>
-                                    <div class="custom-control custom-radio custom-control-inline custom-control-danger">
-                                        <input type="radio" class="custom-control-input" id="sms_status_no" value="no" name="sms_status">
-                                        <label class="custom-control-label" for="sms_status_no">No</label>
-                                    </div>
-                                </div>
-                            </div>
+                            
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="d-block">Default Printer</label>

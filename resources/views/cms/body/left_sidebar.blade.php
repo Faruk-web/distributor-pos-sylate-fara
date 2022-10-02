@@ -444,14 +444,14 @@
                 <li class="nav-main-item">
                     <a class="nav-main-link active" href="{{route('admin.supplier.wing')}}">
                         <i class="nav-main-link-icon si si-speedometer"></i>
-                        <span class="nav-main-link-name"><span class="rounded p-1 bg-primary">Supplier Dashboard</span></span>
+                        <span class="nav-main-link-name"><span class="rounded p-1 bg-primary">Company Dashboard</span></span>
                     </a>
                 </li>
                 @if($user->hasPermissionTo('supplier.view.and.edit') || $user->type == 'owner')
                 <li class="nav-main-item">
                     <a class="nav-main-link active" href="{{route('suppliers.all')}}">
                         <i class="nav-main-link-icon fa fa-people-arrows"></i>
-                        <span class="nav-main-link-name">Suppliers</span>
+                        <span class="nav-main-link-name">Companies</span>
                     </a>
                 </li>
                 @endif
@@ -508,7 +508,7 @@
                 <li class="nav-main-item">
                     <a class="nav-main-link active" href="{{route('supplier.table.ledger')}}">
                         <i class="nav-main-link-icon fas fa-table"></i>
-                        <span class="nav-main-link-name">Supplier Table Ledger</span>
+                        <span class="nav-main-link-name">Company Table Ledger</span>
                     </a>
                 </li>
                 @endif

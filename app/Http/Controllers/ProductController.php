@@ -156,7 +156,7 @@ class ProductController extends Controller
             $data->cartoon_quantity = $request->cartoon_quantity;
             $data->cartoon_purchase_price = $request->cartoon_purchase_price;
             $data->cartoon_sales_price = $request->cartoon_sales_price;
-            //$data->is_variable = $request->type;
+            $data->is_variable = 'simple';
             $data->active = 1;
             $data->created_at = Carbon::now();
             $insert = $data->save();
@@ -271,6 +271,7 @@ class ProductController extends Controller
             $data['cartoon_quantity'] = $request->cartoon_quantity;
             $data['cartoon_purchase_price'] = $request->cartoon_purchase_price;
             $data['cartoon_sales_price'] = $request->cartoon_sales_price;
+            $data['is_variable'] = 'simple';
             // $data['is_variable'] = $request->type;
 
             if(!empty($request->barCode)) {
@@ -475,14 +476,16 @@ class ProductController extends Controller
                 $product_unit_type =$getData[3];
                 $product_purchase_price = $getData[4];
                 $product_selling_price = $getData[5];
-                $p_barcode = $getData[6];
-                $vat_status = $getData[7];
-                $vat_rate = $getData[8];
-                $discount_status = $getData[9];
-                $discount_rate = $getData[10];
+                $is_cartoon = $getData[6];
+                $cartoon_quantity = $getData[7];
+                $cartoon_purchase_price = $getData[8];
+                $cartoon_sales_price = $getData[9];
                 
-                
-                
+                $p_barcode = $getData[10];
+                $vat_status = $getData[11];
+                $vat_rate = $getData[12];
+                $discount_status = $getData[13];
+                $discount_rate = $getData[14];
                 
 
                 $product_check = DB::table('products')->where('shop_id', $shop_id)->where('p_name', $p_name)->first(['id']);
@@ -522,6 +525,10 @@ class ProductController extends Controller
                     $data['vat_rate'] = $vat_rate;
                     $data['discount'] = $discount_status;
                     $data['discount_amount'] = $discount_rate;
+                    $data['is_cartoon'] = $is_cartoon;
+                    $data['cartoon_quantity'] = $cartoon_quantity;
+                    $data['cartoon_purchase_price'] = $cartoon_purchase_price;
+                    $data['cartoon_sales_price'] = $cartoon_sales_price;
                     $data['active'] = 1;
                     $data['created_at'] = Carbon::now();
                     

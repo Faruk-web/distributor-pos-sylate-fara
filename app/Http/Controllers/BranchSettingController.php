@@ -69,10 +69,10 @@ class BranchSettingController extends Controller
             $data['vat_status'] = $request->vat_status;
             $data['vat_rate'] = $request->vat_rate;
             $data['discount_type'] = $request->discount_type;
-            $data['online_sell_status'] = $request->online_sell_status;
-            $data['sell_note'] = $request->sell_note;
-            $data['others_charge'] = $request->others_charge;
-            $data['sms_status'] = $request->sms_status;
+            $data['online_sell_status'] = 'no';
+            $data['sell_note'] = 'no'; //$request->sell_note;
+            $data['others_charge'] = 'no'; //$request->others_charge;
+            $data['sms_status'] = 'no'; //$request->sms_status;
             $data['print_by'] = $request->default_printer;
             
             $data['created_at'] = Carbon::now();
@@ -142,10 +142,10 @@ class BranchSettingController extends Controller
             $data['vat_status'] = $request->vat_status;
             $data['vat_rate'] = $request->vat_rate;
             $data['discount_type'] = $request->discount_type;
-            $data['online_sell_status'] = $request->online_sell_status;
-            $data['sell_note'] = $request->sell_note;
-            $data['others_charge'] = $request->others_charge;
-            $data['sms_status'] = $request->sms_status;
+            $data['online_sell_status'] = 'no';
+            $data['sell_note'] = 'no'; //$request->sell_note;
+            $data['others_charge'] = 'no'; //$request->others_charge;
+            $data['sms_status'] = 'no'; //$request->sms_status;
             $data['print_by'] = $request->default_printer;
             $data['updated_at'] = Carbon::now();
             

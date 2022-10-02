@@ -165,12 +165,13 @@
                                             <div class="block-content text-center">
                                                 <i class="fa fa-people-carry fa-2x text-primary"></i>
                                                 <p class="font-w600 font-size-sm mt-2 mb-3">
-                                                    Supplier Wing
+                                                    Company Wing
                                                 </p>
                                             </div>
                                         </a>
                                         <!-- END CRM -->
                                     </div>
+                                    {{--
                                     <div class="col-6">
                                         <!-- Products -->
                                         <a class="block block-rounded block-link-shadow bg-body" href="{{route('admin.godown.wing')}}">
@@ -183,6 +184,7 @@
                                         </a>
                                         <!-- END Products -->
                                     </div>
+                                    --}}
                                     <div class="col-6">
                                         <!-- Sales -->
                                         <a class="block block-rounded block-link-shadow bg-body mb-0" href="{{route('admin.account.transaction.wing')}}">

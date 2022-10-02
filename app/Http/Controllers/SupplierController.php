@@ -843,7 +843,7 @@ class SupplierController extends Controller
             $supplier_info = supplier::where('code', $code)->where('shop_id', $shop_id)->first();
             if($supplier_info) {
                 $net_cash = DB::table('net_cash_bls')->where('shop_id', $shop_id)->first();
-                $branchs = DB::table('branch_settings')->where('shop_id', $shop_id)->get(['id', 'branch_name']);
+                $branchs = DB::table('branch_settings')->where('shop_id', $shop_id)->get(['id', 'branch_name', 'branch_address']);
                 return view('cms.shop_admin.supplier.stock_in.stock_in_new', compact('supplier_info', 'wing', 'branchs', 'net_cash'));
             }
             else {
@@ -878,7 +878,7 @@ class SupplierController extends Controller
                         if($p_with_variation->isNotEmpty()) {
                             foreach($p_with_variation as $variation) {
                                 if($gloval_vat_status == 'individual_product_vat') { $vat_rate = $product->vat_rate; }else { $vat_rate = 0; }
-                                $output .= '<li class="nav-item mb-1 p-1 rounded" id="product-item" onclick="myFunction(\''.$product->id.'\', \''.$product->p_name.'\', \''.$variation->purchase_price.'\', \''.$variation->selling_price.'\', \''.$product->vat_status.'\', \''.$vat_rate.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.optional($variation->variation_list_info)->list_title.'\',\''.$variation->variation_list_id.'\')" title="Add me">
+                                $output .= '<li class="nav-item mb-1 p-1 rounded" id="product-item" onclick="myFunction(\''.$product->id.'\', \''.$product->p_name.'\', \''.$variation->purchase_price.'\', \''.$variation->selling_price.'\', \''.$product->vat_status.'\', \''.$vat_rate.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.optional($variation->variation_list_info)->list_title.'\',\''.$variation->variation_list_id.'\', \''.$product->is_cartoon.'\', \''.$product->cartoon_quantity.'\')" title="Add me">
                                     <a class="nav-link" id="product_text" href="javascript:void(0)">
                                     <span class=""></span>'.$product->p_name.' <small class="text-success">('.optional($variation->variation_list_info)->list_title.')</small></a>
                                     <div class="list-group-item d-flex justify-content-between">
@@ -892,7 +892,7 @@ class SupplierController extends Controller
                     else {
                         if($gloval_vat_status == 'individual_product_vat') { $vat_rate = $product->vat_rate; }else { $vat_rate = 0; }
                         $type = 'simple';
-                        $output .= '<li class="nav-item mb-1 p-1 rounded" id="product-item" onclick="myFunction(\''.$product->id.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->selling_price.'\', \''.$product->vat_status.'\', \''.$vat_rate.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$type.'\', 0)" title="Add me">
+                        $output .= '<li class="nav-item mb-1 p-1 rounded" id="product-item" onclick="myFunction(\''.$product->id.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->selling_price.'\', \''.$product->vat_status.'\', \''.$vat_rate.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$type.'\', 0, \''.$product->is_cartoon.'\', \''.$product->cartoon_quantity.'\')" title="Add me">
                         <a class="nav-link" id="product_text" href="javascript:void(0)">
                         <span class=""></span>'.$product->p_name.'</small></a>
                         <div class="list-group-item d-flex justify-content-between">
