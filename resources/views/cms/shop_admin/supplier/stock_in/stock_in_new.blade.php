@@ -549,13 +549,13 @@ function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, di
                             </td>
                             <td>
                                 <div class="mb-2 p-1 border rounded shadow">
-                                    <input style="width:117px;" type="number" value="" id="quantity" oninput="changeQuantity()" name="quantity[]" class="quantity" step="any" required>
+                                    <input style="width:117px;" type="number" class="quantity quantity`+generate_id+`" value="" id="quantity" oninput="changeQuantity('`+generate_id+`', '`+is_cartoon+`', '`+cartoon_quantity+`')" name="quantity[]" step="any" required>
                                     <small>Single Qty</small>
                                 </div>
                             </td>
                             <td>
                                 <div class="mb-2 p-1 border rounded shadow">
-                                    <input style="width:117px;" type="number" value="" id="quantity" `+cartoon_status+` oninput="changeQuantity()" name="quantity[]" class="quantity" step="any" required>
+                                    <input style="width:117px;" type="number" class="cartoon_amount cartoon_amount`+generate_id+`" value="0" id="cartoon_amount" `+cartoon_status+` oninput="change_cartoon_amount('`+generate_id+`', '`+is_cartoon+`', '`+cartoon_quantity+`')" name="cartoon_amount[]" step="any" required>
                                     <small>`+cartoon_text+`</small>
                                 </div>
                             </td>
@@ -633,7 +633,31 @@ function c_sales_price(generated_id) {
 // });
 
 
-function changeQuantity() {
+function changeQuantity(generated_id, is_cartoon, cartoon_quantity) {
+    quantity_info_change(generated_id, is_cartoon, cartoon_quantity, 'single_qty');
+    
+}
+
+function change_cartoon_amount(generated_id, is_cartoon, cartoon_quantity) {
+    quantity_info_change(generated_id, is_cartoon, cartoon_quantity, 'cartoon_qty');
+}
+
+function quantity_info_change(generated_id, is_cartoon, cartoon_quantity, info) {
+    if(info == 'single_qty') {
+        if(is_cartoon == 1) {
+            var qty = $('.quantity'+generated_id).val();
+            var total_cartoon = qty / cartoon_quantity;
+            $('.cartoon_amount'+generated_id).val(total_cartoon.toFixed(2));
+        }
+    }
+    else if(info == 'cartoon_qty') {
+        if(is_cartoon == 1) {
+            var cartoon_qty = $('.cartoon_amount'+generated_id).val();
+            var total_qty = cartoon_quantity * cartoon_qty;
+            $('.quantity'+generated_id).val(total_qty.toFixed(2));
+        }
+    }
+
     calculateSum();
     multiply();
 }
