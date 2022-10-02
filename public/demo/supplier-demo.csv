@@ -1,0 +1,2 @@
+Supplier Company Name(Mendatory ),Supplier Name,phone(without 0),email(optional),adderss(optional),balance(If null use 0)
+Samsung,Kamal Uddin,1627382861,kamal@gmail.com,Dhaka,100
