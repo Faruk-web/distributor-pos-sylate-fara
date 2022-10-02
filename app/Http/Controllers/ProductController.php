@@ -152,25 +152,29 @@ class ProductController extends Controller
             $data->p_description = $request->p_description;
             $data->barCode = $request->barCode;
             $data->p_description = $request->p_description;
-            $data->is_variable = $request->type;
+            $data->is_cartoon = $request->is_cartoon;
+            $data->cartoon_quantity = $request->cartoon_quantity;
+            $data->cartoon_purchase_price = $request->cartoon_purchase_price;
+            $data->cartoon_sales_price = $request->cartoon_sales_price;
+            //$data->is_variable = $request->type;
             $data->active = 1;
             $data->created_at = Carbon::now();
             $insert = $data->save();
             
             if($insert) {
                 
-                if(!is_null($request->variation_id) && $request->type == 'variable') {
-                    $variation_id = $request->variation_id;
-                    foreach($variation_id as $key => $item) {
-                        $variation = new ProductWithVariation;
-                        $variation->shop_id = Auth::user()->shop_id;
-                        $variation->pid = $data->id;
-                        $variation->variation_list_id = $request->variation_id[$key];
-                        $variation->purchase_price = $request->variation_purchase_price[$key];
-                        $variation->selling_price = $request->variation_sell_price[$key];
-                        $variation->save();
-                    }
-                }
+                // if(!is_null($request->variation_id) && $request->type == 'variable') {
+                //     $variation_id = $request->variation_id;
+                //     foreach($variation_id as $key => $item) {
+                //         $variation = new ProductWithVariation;
+                //         $variation->shop_id = Auth::user()->shop_id;
+                //         $variation->pid = $data->id;
+                //         $variation->variation_list_id = $request->variation_id[$key];
+                //         $variation->purchase_price = $request->variation_purchase_price[$key];
+                //         $variation->selling_price = $request->variation_sell_price[$key];
+                //         $variation->save();
+                //     }
+                // }
                 
                 
                 DB::table('moments_traffics')->insert(['shop_id' => Auth::user()->shop_id, 'user_id' => Auth::user()->id, 'info' => 'Added New Product, Product name: '.$request->p_name.'', 'created_at' => Carbon::now()]);
@@ -263,7 +267,11 @@ class ProductController extends Controller
             $data['purchase_price'] = $request->purchase_price;
             $data['selling_price'] = $request->selling_price;
             $data['p_description'] = $request->p_description;
-            $data['is_variable'] = $request->type;
+            $data['is_cartoon'] = $request->is_cartoon;
+            $data['cartoon_quantity'] = $request->cartoon_quantity;
+            $data['cartoon_purchase_price'] = $request->cartoon_purchase_price;
+            $data['cartoon_sales_price'] = $request->cartoon_sales_price;
+            // $data['is_variable'] = $request->type;
 
             if(!empty($request->barCode)) {
                 $data['barCode'] = $request->barCode;
@@ -274,27 +282,27 @@ class ProductController extends Controller
             $update = DB::table('products')->where('id', $id)->update($data);
             if($update) {
                 
-                if(!is_null($request->variation_id) && $request->type == 'variable') {
-                    $variation_id = $request->variation_id;
-                    foreach($variation_id as $key => $item) {
-                        $variation_id = $request->variation_id[$key];
-                        $check_exist_variation = ProductWithVariation::Where(['pid' => $id, 'variation_list_id' =>$variation_id])->first();
-                        if(!is_null($check_exist_variation)) {
-                            $variation = $check_exist_variation;
-                            $variation->is_active = $request->is_active[$key];
-                        }
-                        else {
-                            $variation = new ProductWithVariation;
-                            $variation->shop_id = Auth::user()->shop_id;
-                            $variation->pid = $id;
-                            $variation->variation_list_id = $request->variation_id[$key];
-                        }
+                // if(!is_null($request->variation_id) && $request->type == 'variable') {
+                //     $variation_id = $request->variation_id;
+                //     foreach($variation_id as $key => $item) {
+                //         $variation_id = $request->variation_id[$key];
+                //         $check_exist_variation = ProductWithVariation::Where(['pid' => $id, 'variation_list_id' =>$variation_id])->first();
+                //         if(!is_null($check_exist_variation)) {
+                //             $variation = $check_exist_variation;
+                //             $variation->is_active = $request->is_active[$key];
+                //         }
+                //         else {
+                //             $variation = new ProductWithVariation;
+                //             $variation->shop_id = Auth::user()->shop_id;
+                //             $variation->pid = $id;
+                //             $variation->variation_list_id = $request->variation_id[$key];
+                //         }
                         
-                        $variation->purchase_price = $request->variation_purchase_price[$key];
-                        $variation->selling_price = $request->variation_sell_price[$key];
-                        $variation->save();
-                    }
-                }
+                //         $variation->purchase_price = $request->variation_purchase_price[$key];
+                //         $variation->selling_price = $request->variation_sell_price[$key];
+                //         $variation->save();
+                //     }
+                // }
                 
                 DB::table('moments_traffics')->insert(['shop_id' => Auth::user()->shop_id, 'user_id' => Auth::user()->id, 'info' => 'Update Product, Product name: '.$request->p_name.'', 'created_at' => Carbon::now()]);
                 Alert::success('Success', 'New Product has been Updated.');

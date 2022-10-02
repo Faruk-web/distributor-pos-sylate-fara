@@ -83,15 +83,15 @@
                                     <div class="form-group">
                                         <label for="example-text-input-alt"><span class="text-danger">*</span>Active Cartoon / Packet</label>
                                         <select id="" name="is_cartoon" class="form-control" onchange="javascript:select_cartoon_status(this)" required>
-                                            <option value="no">no</option>
-                                            <option value="yes">Yes</option>
+                                            <option value="0">no</option>
+                                            <option value="1">Yes</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6" id="cartoon_info_div" style="display: none;">
                                     <div class="shadow rounded p-2 border">
                                         <div class="form-group">
-                                            <label for="example-text-input-alt"><span class="text-danger">*</span>Cartoon / Packet Quantity</label>
+                                            <label for="example-text-input-alt"><span class="text-danger">*</span>Cartoon / Packet Quantity [ ১ কার্টুন = কত পিছ? ]</label>
                                             <input type="number" class="form-control" step=any id="cartoon_quantity" name="cartoon_quantity">
                                         </div>
                                         <div class="form-group">
@@ -194,13 +194,13 @@
 <script>
 
     function select_cartoon_status(type) {
-        if(type.value == 'no') {
+        if(type.value == '0') {
             $('#cartoon_info_div').hide();
             $('#cartoon_quantity').prop('required', false);
             $('#cartoon_purchase_price').prop('required', false);
             $('#cartoon_sales_price').prop('required', false);
         }
-        else if(type.value == 'yes') {
+        else if(type.value == '1') {
             $('#cartoon_info_div').show();
             $('#cartoon_quantity').prop('required', true);
             $('#cartoon_purchase_price').prop('required', true);

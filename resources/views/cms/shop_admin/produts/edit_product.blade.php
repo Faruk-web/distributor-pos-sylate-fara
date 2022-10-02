@@ -65,6 +65,35 @@
                                 <input type="number" class="form-control "  step=any id="" value="{{$product_info->selling_price}}" name="selling_price" required>
                             </div>
                         </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="row p-1">
+                                <div class="col-md-6 shadow rounded border p-2">
+                                    <div class="form-group">
+                                        <label for="example-text-input-alt"><span class="text-danger">*</span>Active Cartoon / Packet</label>
+                                        <select id="" name="is_cartoon" class="form-control" onchange="javascript:select_cartoon_status(this)" required>
+                                            <option @if(optional($product_info)->is_cartoon == 0) class="text-light bg-success" selected @endif value="0">no</option>
+                                            <option @if(optional($product_info)->is_cartoon == 1) class="text-light bg-success" selected @endif value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" id="cartoon_info_div" @if(optional($product_info)->is_cartoon == 0) style="display: none;" @endif>
+                                    <div class="shadow rounded p-2 border">
+                                        <div class="form-group">
+                                            <label for="example-text-input-alt"><span class="text-danger">*</span>Cartoon / Packet Quantity [ ১ কার্টুন = কত পিছ? ]</label>
+                                            <input type="number" class="form-control" step=any id="cartoon_quantity" value="{{$product_info->cartoon_quantity}}" name="cartoon_quantity">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="example-text-input-alt"><span class="text-danger">*</span>Cartoon Purchase Price</label>
+                                            <input type="number" class="form-control" step=any id="cartoon_purchase_price" value="{{$product_info->cartoon_purchase_price}}" name="cartoon_purchase_price">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="example-text-input-alt"><span class="text-danger">*</span>Cartoon Selling Price</label>
+                                            <input type="number" class="form-control" step=any id="cartoon_sales_price" value="{{$product_info->cartoon_sales_price}}" name="cartoon_sales_price">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row col-md-12 shadow rounded p-2 border mb-3">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -131,14 +160,6 @@
                                 <label for="example-text-input-alt">Description</label>
                                 <textarea name="p_description" id="" cols="30" rows="3" class="form-control">{{$product_info->p_description}}</textarea>
                             </div>
-                            <div class="form-group">
-                                <label for="example-text-input-alt"><span class="text-danger">*</span>Product Type</label>
-                                <select id="" name="type" class="form-control" onchange="javascript:select_type(this)" required>
-                                    <option value="">-- Select Product Type --</option>
-                                    <option @if(optional($product_info)->is_variable == 'simple') class="text-light bg-success" selected @endif value="simple">Simple</option>
-                                    <option @if(optional($product_info)->is_variable == 'variable') class="text-light bg-success" selected @endif value="variable">Variable</option>
-                                </select>
-                            </div>
                         </div>
                         <div class="col-md-6">
                         <div class="form-group">
@@ -167,63 +188,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-12 p-2 mb-4" id="variation_info_div" @if(optional($product_info)->is_variable == 'variable')  @else style="display: none;" @endif  >
-                            <div class="row shadow rounded">
-                                <div class="col-md-3 p-2">
-                                    <div class="shadow rounded p-2">
-                                    @foreach($variations as $variation)
-                                    <?php
-                                        $variation_lists = $variation->variation_lists;
-                                    ?>
-                                    <div class="form-check mb-1">
-                                        <label class="form-check-label text-info">{{$variation->title}}</label>
-                                    </div>
-                                    <div class="row ml-3">
-                                        @foreach($variation_lists as $list)
-                                        @if($list->is_active == 1)
-                                        @php( $check = $product_with_variations->where('variation_list_id', $list->id)->first() )
-                                        <div class="col-md-12">
-                                            <button type="button" @if(!is_null($check)) disabled class="btn btn-primary btn-sm btn-block mb-2 btn-rounded" @else onclick="checkVariation('{{$list->list_title}}', '{{$list->id}}')" class="variation_button btn btn-primary btn-sm btn-block mb-2 btn-rounded" @endif id="list_id{{$list->id}}"   >{{$list->list_title}}</button>
-                                        </div>
-                                        @endif
-                                        @endforeach
-                                    </div>
-                                    <hr>
-                                    @endforeach
-                                    </div>
-                                </div>
-                                <div class="col-md-9 p-2">
-                                    <div class="shadow rounded p-2">
-                                    <table class="table">
-                                      <thead>
-                                        <tr>
-                                          <th width="20%" scope="col">Variations</th>
-                                          <th scope="col">P Price</th>
-                                          <th scope="col">S Price</th>
-                                          <th scope="col">Action / Status</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody id="variation_tbody">
-                                         @foreach($product_with_variations as $variation)
-                                        <tr>
-                                            <td><input type="text" class="form-control" value="{{optional($variation->variation_list_info)->list_title}}" name="" readonly=""><input type="hidden" class="form-control" value="{{optional($variation)->variation_list_id}}" name="variation_id[]"></td>
-                                            <td><input type="number" class="form-control" required="" placeholder="P Price" value="{{optional($variation)->purchase_price}}" name="variation_purchase_price[]" step="any"></td>
-                                            <td><input type="number" class="form-control" placeholder="S Price" required=""  value="{{optional($variation)->selling_price}}" name="variation_sell_price[]" step="any"></td>
-                                            <td>
-                                                <select name="is_active[]" class="form-control" required>
-                                                    <option @if(optional($variation)->is_active == 1) class="text-light bg-success" selected @endif value="1">Active</option>
-                                                    <option @if(optional($variation)->is_active == 0) class="text-light bg-success" selected @endif value="0">Deactive</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                      </tbody>
-                                    </table>
-                                    </div>
-                                </div>
-                                
-                            </div>
-                        </div>
+                        
                     </div>
 
                       
@@ -260,6 +225,21 @@
             $('.variation_tr').html('');
             $('#variation_info_div').hide();
             $('.variation_button').prop('disabled', false);
+        }
+    }
+
+    function select_cartoon_status(type) {
+        if(type.value == '0') {
+            $('#cartoon_info_div').hide();
+            $('#cartoon_quantity').prop('required', false);
+            $('#cartoon_purchase_price').prop('required', false);
+            $('#cartoon_sales_price').prop('required', false);
+        }
+        else if(type.value == '1') {
+            $('#cartoon_info_div').show();
+            $('#cartoon_quantity').prop('required', true);
+            $('#cartoon_purchase_price').prop('required', true);
+            $('#cartoon_sales_price').prop('required', true);
         }
     }
     
