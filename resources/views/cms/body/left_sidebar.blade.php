@@ -298,17 +298,24 @@
                                 <span class="nav-main-link-name">Upload Product By CSV</span>
                             </a>
                         </li>
+
                         <li class="nav-main-item">
                             <a class="nav-main-link" href="{{route('admin.product.barcode')}}">
                                 <span class="nav-main-link-name">Barcode</span>
                             </a>
                         </li>
+                        {{--
                         <li class="nav-main-item">
                             <a class="nav-main-link" href="{{route('admin.product.barcode.printers')}}">
                                 <span class="nav-main-link-name">Barcode Level Printers</span>
                             </a>
                         </li>
-                        
+                        --}}
+                        <li class="nav-main-item">
+                            <a class="nav-main-link" href="{{route('admin.products.btob')}}">
+                                <span class="nav-main-link-name">Branch To Branch Transfer</span>
+                            </a>
+                        </li>
                         
                     </ul>
                 </li>
@@ -382,7 +389,9 @@
                             <span class="nav-main-link-name">Customers</span>
                         </a>
                         <ul class="nav-main-submenu">
+                            {{--
                             <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.all.customer.types')}}"><span class="nav-main-link-name">Customer Types</span></a></li>
+                            --}}
                             <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.customer.create')}}"><span class="nav-main-link-name">Add New Customer</span></a></li>
                             <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.customers')}}"><span class="nav-main-link-name">All Customers</span></a></li>
                         </ul>

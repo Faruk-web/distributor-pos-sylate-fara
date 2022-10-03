@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use App\Models\User;
+use App\Models\Area;
 use DataTables;
 
 class CustomerController extends Controller
@@ -310,10 +311,13 @@ class CustomerController extends Controller
                     </div>';
                     return $info;
                 })
-                ->addColumn('branch_name', function($row){
-                    return optional($row->branch_name)->branch_name;
+                // ->addColumn('branch_name', function($row){
+                //     return optional($row->branch_name)->branch_name;
+                // })
+                ->addColumn('area', function($row){
+                    return optional($row->area_info)->name;
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'area'])
                 ->make(true);
         }
     }
@@ -360,9 +364,10 @@ class CustomerController extends Controller
     {
         if(User::checkPermission('others.customers') == true){
             $wing = 'main';
+            $areas = Area::all();
             $branches = DB::table('branch_settings')->where('shop_id', Auth::user()->shop_id)->get(['id', 'branch_name', 'branch_address']);
             $customer_types = DB::table('customer_types')->where(['shop_id'=>Auth::user()->shop_id, 'active'=>1])->orderBy('id', 'desc')->get(['type_name', 'id']);
-            return view('cms.shop_admin.customers.add_customers', compact('customer_types', 'wing', 'branches'));
+            return view('cms.shop_admin.customers.add_customers', compact('customer_types', 'wing', 'branches', 'areas'));
         }
         else {
             return Redirect()->back()->with('error', 'Sorry you can not access this page');
@@ -397,6 +402,7 @@ class CustomerController extends Controller
                 $data['phone'] = $phone;
                 $data['email'] = $email;
                 $data['address'] = $request->address;
+                $data['area_id'] = $request->area_id;
                 $data['customers_type_id'] = $request->customer_type;
                 $data['is_comissioned'] = $request->comission_value;
                 $data['opening_bl'] = $request->opening_bl;
@@ -492,12 +498,13 @@ class CustomerController extends Controller
     public function admin_edit_customer($id) {
         if(User::checkPermission('others.customers') == true){
             $wing = 'main';
+            $areas = Area::all();
             $shop_id = Auth::user()->shop_id;
             $branches = DB::table('branch_settings')->where('shop_id', Auth::user()->shop_id)->get(['id', 'branch_name', 'branch_address']);
             $customer_types = DB::table('customer_types')->where(['shop_id'=>$shop_id, 'active'=>1])->orderBy('id', 'desc')->get(['type_name', 'id']);
             $customer = customer::where('id', $id)->where('shop_id', $shop_id)->where('code', '!=', $shop_id.'WALKING')->first();
             if(!empty($customer->id)) {
-                return view('cms.shop_admin.customers.edit_customers', compact('customer', 'customer_types', 'wing', 'branches'));
+                return view('cms.shop_admin.customers.edit_customers', compact('customer', 'areas', 'customer_types', 'wing', 'branches'));
             }
             else {
                 return Redirect()->back()->with('error', 'Error Occoured! Please Try Again.');
@@ -529,6 +536,7 @@ class CustomerController extends Controller
                 $data['phone'] = $phone;
                 $data['email'] = $email;
                 $data['address'] = $request->address;
+                $data['area_id'] = $request->area_id;
                 $data['customers_type_id'] = $request->customer_type;
                 $data['is_comissioned'] = $request->comission_value;
                 $data['updated_at'] = Carbon::now();

@@ -13,4 +13,10 @@ class Customer extends Model
     public function branch_name() {
         return $this->belongsTo(Branch_setting::class, 'branch_id');
     }
+
+    public function area_info() {
+        return $this->belongsTo(Area::class, 'area_id');
+    }
+
+    
 }

@@ -8,8 +8,8 @@
                         <div class="col-md-4">
                             <h3 class="block-title text-light">Add New Customer</h3>
                         </div>
-                        <div class="col-md-3 text-right"><a href="{{route('admin.download.exist.customers')}}" class="btn btn-rounded btn-success btn-sm">Download Exist Customers</a></div>
-                        <div class="col-md-2 text-right">
+                        <div class="col-md-3 text-right d-none"><a href="{{route('admin.download.exist.customers')}}" class="btn btn-rounded btn-success btn-sm">Download Exist Customers</a></div>
+                        <div class="col-md-2 text-right d-none">
                             <div class="dropdown push">
                                 <button type="button" class="btn btn-light btn-sm dropdown-toggle" id="dropdown-content-rich-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Bulk Upload</button>
                                 <div class="dropdown-menu font-size-sm" aria-labelledby="dropdown-content-rich-primary" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 31px, 0px);">
@@ -29,7 +29,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 text-right">
+                        <div class="col-md-3 text-right d-none">
                             <a href="{{route('download.demo.file', ['file_name'=>'custoemr-demo.csv'])}}" class="btn btn-rounded btn-primary btn-sm">Download Demo CSV</a>
                         </div>
                     </div>
@@ -78,7 +78,18 @@
                             <input type="number" class="form-control" value="0" step=any name="opening_bl" required>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="example-text-input"><span class="text-danger">*</span>Area</label>
+                            <select class="form-control" name="area_id" id="" required>
+                                <option value="">-- Select Area --</option>
+                                @foreach($areas as $area)
+                                <option value="{{$area->id}}">{{$area->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div> 
+                    <div class="col-md-4 d-none">
                         <div class="form-group">
                             <label for="example-text-input">Branch</label>
                             <select class="form-control" name="branch_id" id="">
@@ -88,7 +99,7 @@
                             </select>
                         </div>
                     </div> 
-                    <div class="col-md-4">
+                    <div class="col-md-4 d-none">
                         <div class="form-group">
                             <label for="example-text-input">Customer Type</label>
                             <select class="form-control" name="customer_type" id="">
@@ -99,7 +110,7 @@
                             </select>
                         </div>
                     </div>  
-                    <div class="col-md-4">
+                    <div class="col-md-4 d-none">
                         <div class="form-group">
                             <label for="example-text-input">Is Comissioned Customer?</label>
                             <select class="form-control comissioned_customer" id="">

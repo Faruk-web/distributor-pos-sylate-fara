@@ -49,7 +49,18 @@
                             <input type="number" class="form-control" readonly value="{{$customer->opening_bl}}" step=any name="opening_bl" required>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="example-text-input"><span class="text-danger">*</span>Area</label>
+                            <select class="form-control" name="area_id" id="" required>
+                                <option value="">-- Select Area --</option>
+                                @foreach($areas as $area)
+                                <option @if($area->id == $customer->area_id) selected class="bg-success text-light" @endif value="{{$area->id}}">{{$area->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div> 
+                    <div class="col-md-4 d-none">
                         <div class="form-group">
                             <label for="example-text-input">Branch</label>
                             <select class="form-control" name="branch_id">
@@ -59,7 +70,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 d-none">
                         <div class="form-group">
                             <label for="example-text-input">Customer Type</label>
                             <select class="form-control" name="customer_type" id="">
@@ -70,7 +81,7 @@
                             </select>
                         </div>
                     </div>  
-                    <div class="col-md-4">
+                    <div class="col-md-4 d-none">
                         <div class="form-group">
                             <label for="example-text-input">Is Comissioned Customer?</label>
                             <select class="form-control comissioned_customer" id="">

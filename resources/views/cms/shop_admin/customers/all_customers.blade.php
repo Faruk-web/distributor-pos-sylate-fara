@@ -29,9 +29,9 @@
                         <th>Customer Name</th>
                         <th>Code</th>
                         <th>Phone</th>
-                        <th>Email</th>
+                        <th>Area</th>
                         <th>Address</th>
-                        <th>Branch Name</th>
+                        {{-- <th>Branch Name</th> --}}
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -54,9 +54,9 @@
             {data: 'name', name: 'name'},
             {data: 'code', name: 'code'},
             {data: 'phone', name: 'phone'},
-            {data: 'email', name: 'email'},
+            {data: 'area', name: 'area'},
             {data: 'address', name: 'adderss'},
-            {data: 'branch_name', name: 'branch_name'},
+            // {data: 'branch_name', name: 'branch_name'},
             {data: 'action', name: 'action'},
         ],
         "scrollY": "300px",

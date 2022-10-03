@@ -42,6 +42,7 @@ use App\Http\Controllers\BusinessRenewController;
 use App\Http\Controllers\BarcodePrintersController;
 use App\Http\Controllers\ProductVariationController;
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\BranchToBranchTransferController;
 
 
 
@@ -292,6 +293,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/admin/damage-stock-info', [DamageProductController::class, 'admin_damage_stock_info'])->name('admin.damage.stock.info');
         Route::get('/admin/damage-stock-data', [DamageProductController::class, 'admin_damage_stock_info_data'])->name('admin.all.damaged.product.data');
         //End:: Admin damage products
+
+        //Begin::BRanch to branch Transfer
+        Route::get('/admin/products/branch-to-branch-transfer', [BranchToBranchTransferController::class, 'create'])->name('admin.products.btob');
+
+        //End::BRanch to branch Transfer
 
         //BEgin::Admin & Branch Product stocks
         Route::get('/admin/branch-product-stocks', [ProductController::class, 'branch_and_godown_product_stock'])->name('admin.branch.product.stock');
