@@ -28,7 +28,6 @@ class BranchToBranchTransferController extends Controller
     public function create()
     {
         if(User::checkPermission('admin.products') == true){
-
             $branches = Branch_setting::Where('shop_id', Auth::user()->shop_id)->get();
             $wing = 'main';
             return view('cms.shop_admin.produts.b_to_b_transfer', compact('wing', 'branches'));
