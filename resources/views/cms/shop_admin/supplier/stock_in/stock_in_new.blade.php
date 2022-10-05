@@ -499,6 +499,7 @@ function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, di
         document.getElementById('error').play();
     }
     else {
+
         if(is_cartoon != 1){ cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>" }else { cartoon_text= cartoon_quantity+" = 1 Cartoon"; }
         const cartDom = `<tr id="cart_tr`+generate_id+`">
                             <td>
@@ -661,6 +662,7 @@ function quantity_info_change(generated_id, is_cartoon, cartoon_quantity, info) 
     calculateSum();
     multiply();
 }
+
 
 function change_price() {
     calculateSum();

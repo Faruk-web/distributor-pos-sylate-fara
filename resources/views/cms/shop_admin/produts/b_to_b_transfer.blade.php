@@ -194,10 +194,9 @@ function godown_stock_empty() {
 }
 
 
-function myFunction(row_id, id, variation_id, variation_name, purchase_line_id, lot_number, name, purchase_price, sales_price, vat, discount, discount_amount,  godown_stock, unit_type) {
+function myFunction(row_id, id, variation_id, variation_name, purchase_line_id, lot_number, name, purchase_price, sales_price, vat, discount, discount_amount, stock, unit_type, cartoon_quantity, cartoon_amount) {
     
-    var variation_info = '';
-
+    var variation_info, cartoon_text, cartoon_status = '';
 
     if(variation_id == '0' || variation_id == '') {  var generate_id = row_id+'_'+lot_number;  }  else {  var generate_id = row_id+'_'+lot_number+'_'+variation_id;  variation_info = '<span class="text-primary">('+variation_name+')</span>'; }
     
@@ -210,23 +209,33 @@ function myFunction(row_id, id, variation_id, variation_name, purchase_line_id, 
         document.getElementById('error').play();
     }
      else {
-         
+        if(cartoon_quantity > 0){ cartoon_text= "Max Cartoon Qty = "+cartoon_amount; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
         const cartDom = `<tr id="cart_tr`+generate_id+`">
                             <td>
                                 <input type="hidden" name="pid[]" value="`+id+`">
+                                <input type="hidden" name="cartoon_quantity[]" value="`+cartoon_quantity+`">
+                                <input type="hidden" name="cartoon_amount[]" value="`+cartoon_amount+`">
                                 <input type="hidden" name="row_id[]" value="`+row_id+`">
                                 <input type="hidden" name="lot_number[]" value="`+lot_number+`">
                                 <input type="hidden" name="variation_id[]" value="`+variation_id+`">
                                 <input type="hidden" id="check_id`+generate_id+`" value="`+generate_id+`">
-                                <h6 class="mb-0 text-success">`+name+` `+variation_info+`</h6>
+                                <h6 class="mb-0 text-success">`+name+`</h6>
                                 <small><b>Lot Number:</b> `+lot_number+`, <b>Sales Price:</b> `+sales_price+`, <b>Discount:</b> `+discount+`(`+discount_amount+`), <b>VAT:</b> `+vat+`%</small>
                             </td>
+                            
                             <td>
-                                <input type="number" required="" style="width: 100px;" value="" id="quantity" name="quantity[]" max="`+godown_stock+`" class="quantity" step="any"> `+unit_type+`
+                                <div class="mb-2 p-1 border rounded shadow">
+                                    <input style="width:117px;" type="number" class="quantity quantity`+generate_id+`" value="" max="`+stock+`" id="quantity" oninput="changeQuantity('`+generate_id+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')" name="quantity[]" step="any" required>
+                                    <br><small>Max Transfer Qty `+stock+` `+unit_type+`</small>
+                                </div>
                             </td>
                             <td>
-                                <input style="width: 100px;" type="number" value="`+godown_stock+`" id="godown_stock" name="godown_stock[]" class="godown_stock" readonly step="any"> `+unit_type+`
+                                <div class="mb-2 p-1 border rounded shadow">
+                                    <input style="width:117px;" type="number" class="cartoon_amount cartoon_amount`+generate_id+`" value="0" id="cartoon_amount" `+cartoon_status+` oninput="change_cartoon_amount('`+generate_id+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')" name="cartoon_amount[]" step="any" required>
+                                    <br><small>`+cartoon_text+`</small>
+                                </div>
                             </td>
+
                             <td class="text-center">
                                 <button type="button"  onclick="remove_cart_tr('`+generate_id+`')" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
                             </td>
@@ -278,6 +287,34 @@ function multiply()
 
 <!--This is for product delete-->
 <script>
+
+
+function changeQuantity(generated_id, cartoon_quantity, cartoon_amount) {
+    quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, 'single_qty');
+    
+}
+
+function change_cartoon_amount(generated_id, cartoon_quantity, cartoon_amount) {
+    quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, 'cartoon_qty');
+}
+
+function quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, info) {
+    if(info == 'single_qty') {
+        if(cartoon_quantity > 0) {
+            var qty = $('.quantity'+generated_id).val();
+            var total_cartoon = qty / cartoon_quantity;
+            $('.cartoon_amount'+generated_id).val(total_cartoon.toFixed(2));
+        }
+    }
+    else if(info == 'cartoon_qty') {
+        if(cartoon_quantity > 0) {
+            var cartoon_qty = $('.cartoon_amount'+generated_id).val();
+            var total_qty = cartoon_quantity * cartoon_qty;
+            $('.quantity'+generated_id).val(total_qty.toFixed(2));
+        }
+    }
+}
+
 
 
 //product barcode to product
@@ -358,10 +395,14 @@ function branch_select_next_step() {
 $('#product_title').keyup(function(){
     $('#product_barcode_search').val('');
     var title = $(this).val();
+    var sender_branch = $('#sender_branch').val();
     $.ajax({
         type : 'get',
-        url: '/godown/stock-out/search-product-by-title_new',
-        data:{'title':title},
+        url: '/admin/products/branch-to-branch-transfer/search_products',
+        data:{
+            'title':title,
+            'sender_branch':sender_branch,
+        },
         success:function(data){
             $('#myUL').html(data);
         }
