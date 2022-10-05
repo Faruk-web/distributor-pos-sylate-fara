@@ -297,7 +297,7 @@ Route::group(['middleware' => 'auth'], function () {
         //Begin::BRanch to branch Transfer
         Route::get('/admin/products/branch-to-branch-transfer', [BranchToBranchTransferController::class, 'create'])->name('admin.products.btob');
         Route::get('/admin/products/branch-to-branch-transfer/search_products', [BranchToBranchTransferController::class, 'get_products_search_by_title_into_branh_to_branch_transfer']);
-
+        Route::post('/admin/products/branch-to-branch-transfer/store', [BranchToBranchTransferController::class, 'store'])->name('branch.to.branch.transfer.comfirm');
         //End::BRanch to branch Transfer
 
         //BEgin::Admin & Branch Product stocks

@@ -7,12 +7,14 @@
 <div class="content">
     <div class="block block-rounded">
         <div class="block-content">
+            <form action="{{route('branch.to.branch.transfer.comfirm')}}" method="post" id="form_1">
+            @csrf
             <div class="p-3" id="select_branch_row">
             <div class="row mb-3 shadow rounded-pill border">
                 <div class="col-md-5 p-4">
                     <div class="p-3">
                         <label for=""><span class="text-danger">*</span>Sender Branch</label>
-                        <select name="0" id="sender_branch" class="form-control">
+                        <select name="sender_branch" id="sender_branch" class="form-control">
                             <option value="">-- Select Sender Branch --</option>
                             @foreach ($branches as $branch)
                             <option value="{{$branch->id}}">{{$branch->branch_name}}</option>
@@ -23,7 +25,7 @@
                 <div class="col-md-5 p-4">
                     <div class="p-3">
                         <label for=""><span class="text-danger">*</span>Receiver Branch</label>
-                        <select name="" id="receiver_branch" class="form-control">
+                        <select name="receiver_branch" id="receiver_branch" class="form-control">
                             <option value="0">-- Select Receiver Branch --</option>
                             @foreach ($branches as $branch)
                             <option value="{{$branch->id}}">{{$branch->branch_name}}</option>
@@ -87,8 +89,6 @@
                         <h4 class="fw-bold mb-2" id="branch_titles"></h4>
                         <div class="shadow border p-2">
                             <div class="">
-                                <form action="{{route('godown.stock.out.confirm.new')}}" method="post" id="form_1">
-                                    @csrf
                                     <table id="mainTable" class="table editable-table table-bordered  table-sm mb-0">
                                         <thead>
                                             <tr style="background-color:#1769aa;color:#fff;">
@@ -142,12 +142,12 @@
                                             </div>
                                             </div>
                                         </div>
-                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </form>
         </div>
     </div>
 </div>
@@ -314,7 +314,6 @@ function quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, in
         }
     }
 }
-
 
 
 //product barcode to product
