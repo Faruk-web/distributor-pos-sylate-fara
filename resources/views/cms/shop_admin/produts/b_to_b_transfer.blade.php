@@ -44,7 +44,7 @@
                     <div class="" >
                         <div class="shadow p-2">
                             <input type="text" class="form-control form-control-sm" placeholder="Search By Product Name" id="product_title">
-                            <div class="form-group row mt-2">
+                            <div class="form-group row mt-2 d-none">
                                 <div class="input-group col-md-12">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-barcode"></i></span>
@@ -93,12 +93,12 @@
                                         <thead>
                                             <tr style="background-color:#1769aa;color:#fff;">
                                                 <th width="45%" style="padding: 10px 7px;">Product info</th>
-                                                <th style="padding: 10px 7px;">Unit</th>
-                                                <th style=" width: 23%;padding: 10px 7px;">Godown Stock</th>
+                                                <th style="padding: 10px 7px;">Quantity</th>
+                                                <th style="padding: 10px 7px;">CARTOON Qty</th>
                                                 <th style="padding: 10px 7px; text-align: center;">X</th>
                                             </tr>
                                         </thead>
-                                        <tbody id = "demo" class="demo"></tbody>
+                                        <tbody id="demo" class="demo"></tbody>
                                     </table>
                                     <hr class="bg-warning">
                                     <div class="row">

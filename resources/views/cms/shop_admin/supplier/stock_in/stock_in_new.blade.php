@@ -148,7 +148,7 @@
                             <div class="" id="products-tabs" style="display: none;">
                                 <div class="shadow p-2">
                                     <input type="text" class="form-control form-control-sm" placeholder="Search By Product Name" id="product_title">
-                                    <div class="form-group row mt-2">
+                                    <div class="form-group row mt-2 d-none">
                                         <div class="input-group col-md-12">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-barcode"></i></span>
