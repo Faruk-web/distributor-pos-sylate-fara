@@ -179,7 +179,7 @@ class BranchToBranchTransferController extends Controller
                         
                         if(!is_null($exist_check)) {
                             $update_quantity = $exist_check->stock + $quantity;
-                            $update_cartoon_qty = $exist_check->stock + $cartoon_amount;
+                            $update_cartoon_qty = $exist_check->cartoon_amount + $cartoon_amount;
                             DB::table('product_stocks')->where(['id'=>$exist_check->id, 'shop_id'=>$shop_id])->update(['stock'=>$update_quantity, 'cartoon_amount'=>$update_cartoon_qty]);
                             $rest_quantity = $db_stock - $quantity;
                             $rest_cartoon_qty = $check_product->cartoon_amount - $cartoon_amount;

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BranchToBranchTransferProducts extends Model
+class BranchToSrTransferedProducts extends Model
 {
     use HasFactory;
 }

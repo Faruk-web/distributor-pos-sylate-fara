@@ -43,6 +43,8 @@ use App\Http\Controllers\BarcodePrintersController;
 use App\Http\Controllers\ProductVariationController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\BranchToBranchTransferController;
+use App\Http\Controllers\BranchToSRproductsTransferController;
+
 
 
 
@@ -416,7 +418,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/supplier/product-purchase/search-product-by-title_new', [SupplierController::class, 'get_products_search_by_title_into_purchase_new']);
         Route::post('/supplier/stock-in-new/confirm', [SupplierController::class, 'supplier_stock_in_confirm_new'])->name('supplier.stock.in.new.confirm');
         Route::get('/supplier/product-purchase-search-barcode_new', [SupplierController::class, 'supplier_product_purchase_search_barcode_new']);
-        
         //End:: Suppliers Stock In New
         
         
@@ -728,10 +729,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/admin/send-sms-customer-data', [SmsHistoryController::class, 'customer_data'])->name('admin.sms.send.customer.data');
         Route::get('/admin/send-sms-supplier-data', [SmsHistoryController::class, 'supplier_data'])->name('admin.sms.send.supplier.data');
         Route::post('/admin/send-single-group-sms', [SmsHistoryController::class, 'send_single_sms'])->name('admin.send.single.sms');
-        
-        
-        
-        
         //End:: Shop Admin SMS
         
         
@@ -739,14 +736,21 @@ Route::group(['middleware' => 'auth'], function () {
         
 
         
-        
-
-
     // End:: Shop Account and transaction Route ---------------------->
 
 
 
-    
+    // Begin:: SR Route ------------------------------------------------------>
+
+        //Begin:: Branch To SR transfer Products
+        Route::get('/sr/transfer-products-branch-to-sr', [BranchToSRproductsTransferController::class, 'create'])->name('b.to.sr.transfer');
+        Route::post('/sr/transfer-products-branch-to-sr-confirm', [BranchToSRproductsTransferController::class, 'store'])->name('b.to.sr.transfer.confirm');
+        Route::get('/sr/transfer-products-branch-to-sr-invoices', [BranchToSRproductsTransferController::class, 'index'])->name('b.to.sr.transfer.index');
+        Route::get('/sr/transfer-products-branch-to-sr-invoices_data', [BranchToSRproductsTransferController::class, 'index_data'])->name('b.to.sr.transfer.index.data');
+        
+
+    // End:: SR Route ------------------------------------------------------>
+
 
     
 

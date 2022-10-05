@@ -129,7 +129,10 @@ class User extends Authenticatable
         return $this->belongsTo(Net_cash_bl::class, 'shop_id', 'shop_id');
     }
 
-    
+    //return branch info
+    public function area_info() {
+      return $this->belongsTo(Area::class, 'sr_area_id');
+    }
     
 
 
