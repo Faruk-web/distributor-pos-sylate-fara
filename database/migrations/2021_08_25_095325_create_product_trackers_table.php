@@ -22,7 +22,7 @@ class CreateProductTrackersTable extends Migration
             $table->string('total_purchase_price')->default(0);
             $table->double('sales_price')->default(0);
             $table->integer('variation_id')->default(0);
-            $table->integer('branch_id')->index();
+            $table->integer('branch_id')->index()->nullable();
             $table->integer('product_id')->index();
             $table->double('quantity')->default(0);
             $table->double('cartoon_quantity')->default(0);
@@ -37,7 +37,7 @@ class CreateProductTrackersTable extends Migration
             $table->integer('status');
             $table->string('product_form')->nullable();
             $table->string('invoice_id')->index();
-            $table->string('supplier_id')->index();
+            $table->string('supplier_id')->index()->nullable();
             $table->mediumText('note')->nullable();
             $table->timestamps();
         });

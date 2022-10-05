@@ -72,7 +72,9 @@ class Permissions extends Seeder
             ['name'=>'admin.damage.product', 'guard_name'=>'web', 'group_name'=>'Main_Wing'],
             ['name'=>'admin.header.balance.statements', 'guard_name'=>'web', 'group_name'=>'Main_Wing'],
             ['name'=>'admin.sms.panel', 'guard_name'=>'web', 'group_name'=>'Main_Wing'],
+            ['name'=>'admin.branch.to.sr.transfer.products', 'guard_name'=>'web', 'group_name'=>'Main_Wing'],
             ['name'=>'others.sell.discount', 'guard_name'=>'web', 'group_name'=>'Main_Wing'],
+            
             
             
             ['name'=>'supplier.dashboard', 'guard_name'=>'web', 'group_name'=>'Supplier_Wing'],

@@ -316,6 +316,11 @@
                                 <span class="nav-main-link-name">Branch To Branch Transfer</span>
                             </a>
                         </li>
+                        <li class="nav-main-item">
+                            <a class="nav-main-link" href="{{route('admin.products.btob.invoices')}}">
+                                <span class="nav-main-link-name">BTB Transfer Invoices</span>
+                            </a>
+                        </li>
                         
                     </ul>
                 </li>

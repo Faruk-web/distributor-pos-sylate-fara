@@ -9,6 +9,8 @@ use App\Models\Branch_setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use PDF;
+use DataTables;
 
 class BranchToBranchTransferController extends Controller
 {
@@ -19,8 +21,41 @@ class BranchToBranchTransferController extends Controller
      */
     public function index()
     {
-        //
+        if(User::checkPermission('admin.products') == true){
+            $wing = 'main';
+            return view('cms.shop_admin.produts.b_to_b_transfer_invoices', compact('wing'));
+        }
+        else {
+            return Redirect()->back()->with('error', 'Sorry you can not access this page');
+        }
     }
+
+    public function index_data(Request $request) {
+        if ($request->ajax()) {
+            $invoices = BranchToBranchTransfer::OrderBy('id', 'DESC')->get();
+            return Datatables::of($invoices)
+                ->addIndexColumn()
+                ->addColumn('action', function($row){
+                    return '<a target="_blank" href="#" class="btn btn-primary btn-sm btn-rounded">Invoice</a>';
+                })
+                ->addColumn('invoice', function($row){
+                    return "#".str_replace("_","/", $row->invoice_id);
+                })
+                ->addColumn('date', function($row){
+                    return date("d-m-Y", strtotime($row->date));
+                })
+                ->addColumn('sender_branch', function($row){
+                    return optional($row->senderBranchInfo)->branch_name;
+                })
+                ->addColumn('receiver_branch', function($row){
+                    return optional($row->receiverBranchInfo)->branch_name;
+                })
+                
+                ->rawColumns(['action', 'invoice', 'sender_branch', 'receiver_branch'])
+                ->make(true);
+        }
+    }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -147,10 +182,10 @@ class BranchToBranchTransferController extends Controller
                             $update_cartoon_qty = $exist_check->stock + $cartoon_amount;
                             DB::table('product_stocks')->where(['id'=>$exist_check->id, 'shop_id'=>$shop_id])->update(['stock'=>$update_quantity, 'cartoon_amount'=>$update_cartoon_qty]);
                             $rest_quantity = $db_stock - $quantity;
-                            $rest_cartoon_qty = $check_product->cartoon_amount - $update_cartoon_qty;
+                            $rest_cartoon_qty = $check_product->cartoon_amount - $cartoon_amount;
                         }
                         else {
-                            $insert = DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'branch_id'=>$branch_id, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'stock'=>$quantity, 'cartoon_quantity'=>$check_product->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount]);
+                            $insert = DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'branch_id'=>$receiver_branch, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'stock'=>$quantity, 'cartoon_quantity'=>$check_product->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount]);
                             $rest_cartoon_qty = $check_product->cartoon_amount - $cartoon_amount;
                             $rest_quantity = $db_stock - $quantity;
                         }
@@ -169,9 +204,11 @@ class BranchToBranchTransferController extends Controller
                         $p_data['purchase_price'] = $check_product->purchase_price;
                         $p_data['sales_price'] = $check_product->sales_price;
                         $p_data['variation_id'] = $check_product->variation_id;
-                        $p_data['branch_id'] = $branch_id;
+                        $p_data['branch_id'] = $sender_branch;
                         $p_data['product_id'] = $product_id;
                         $p_data['quantity'] = $quantity;
+                        $p_data['cartoon_quantity'] = $check_product->cartoon_quantity;
+                        $p_data['cartoon_amount'] = $cartoon_amount;
                         $p_data['price'] = 0;
                         $p_data['discount'] = $check_product->discount;
                         $p_data['discount_amount'] = $check_product->discount_amount;
@@ -181,22 +218,21 @@ class BranchToBranchTransferController extends Controller
                         $p_data['product_form'] = 'BTB';
                         $p_data['invoice_id'] = $invoice_id;
                         $p_data['note'] = $request->note;
-                        $p_data['created_at'] = $current_time;
-                        //$insert_product_trackers = DB::table('product_trackers')->insert($p_data);
-                        
+                        $p_data['created_at'] = $date;
+                        $insert_product_trackers = DB::table('product_trackers')->insert($p_data);
                     }
                     
                 }
             }
             
-            //$insert = BranchToBranchTransfer::insert(['shop_id'=>$shop_id, 'user_id'=>Auth::user()->id, 'invoice_id'=>$invoice_id, 'branch_id'=>$branch_id, 'note'=>$request->note, 'date'=>$date, 'created_at'=>$current_time]);
-            // if($insert) {
-            //     DB::table('moments_traffics')->insert(['shop_id' => $shop_id, 'user_id' => Auth::user()->id, 'info' => 'Stock Out from Godown. Invoice num '.$invoice_id, 'created_at' => $current_time]);
-            //     return Redirect()->route('godown.stock.out.invoices')->with('success', 'Stock Out from Godown Successfully done.');
-            // }
-            // else {
-            //     return Redirect()->back()->with('error', 'Sorry something is wrong, please try again.');
-            // }
+            $insert = BranchToBranchTransfer::insert(['shop_id'=>$shop_id, 'user_id'=>Auth::user()->id, 'invoice_id'=>$invoice_id, 'sender_branch_id'=>$sender_branch, 'receiver_branch_id'=>$receiver_branch, 'note'=>$request->note, 'date'=>$date, 'created_at'=>$current_time]);
+            if($insert) {
+                DB::table('moments_traffics')->insert(['shop_id' => $shop_id, 'user_id' => Auth::user()->id, 'info' => 'Stock Out from Branch BY BTB Transfer. Invoice num '.$invoice_id, 'created_at' => $current_time]);
+                return Redirect()->route('admin.products.btob.invoices')->with('success', 'Stock Out from Branch BY BTB Transfer Successfully done.');
+            }
+            else {
+                return Redirect()->back()->with('error', 'Sorry something is wrong, please try again.');
+            }
             
         }
         else {

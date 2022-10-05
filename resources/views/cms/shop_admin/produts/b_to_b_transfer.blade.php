@@ -213,8 +213,6 @@ function myFunction(row_id, id, variation_id, variation_name, purchase_line_id, 
         const cartDom = `<tr id="cart_tr`+generate_id+`">
                             <td>
                                 <input type="hidden" name="pid[]" value="`+id+`">
-                                <input type="hidden" name="cartoon_quantity[]" value="`+cartoon_quantity+`">
-                                <input type="hidden" name="cartoon_amount[]" value="`+cartoon_amount+`">
                                 <input type="hidden" name="row_id[]" value="`+row_id+`">
                                 <input type="hidden" name="lot_number[]" value="`+lot_number+`">
                                 <input type="hidden" name="variation_id[]" value="`+variation_id+`">
