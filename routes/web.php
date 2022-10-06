@@ -747,7 +747,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/sr/transfer-products-branch-to-sr-confirm', [BranchToSRproductsTransferController::class, 'store'])->name('b.to.sr.transfer.confirm');
         Route::get('/sr/transfer-products-branch-to-sr-invoices', [BranchToSRproductsTransferController::class, 'index'])->name('b.to.sr.transfer.index');
         Route::get('/sr/transfer-products-branch-to-sr-invoices_data', [BranchToSRproductsTransferController::class, 'index_data'])->name('b.to.sr.transfer.index.data');
-        
+        Route::get('/sr/product-stocks', [BranchToSRproductsTransferController::class, 'show'])->name('sr.product.stock');
+        Route::get('/sr/product-stocks_data/{place}', [ProductController::class, 'branch_and_godown_product_stock_data']);
 
     // End:: SR Route ------------------------------------------------------>
 

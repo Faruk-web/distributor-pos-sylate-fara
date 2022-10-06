@@ -16,32 +16,25 @@
     <form action="{{route('admin.report.products.current.stock.print')}}" method="post" target="_blank">
             @csrf
             <div class="row p-2">
-                <div class="col-md-7">
-                    <h4 class="text-success" id="stock_position_title">Branch Current Active Stocks</h4>
+                <div class="col-md-5">
+                    <h4 class="text-success mb-2" id="stock_position_title">SR Products Stocks</h4>
+                    <small><b>Date: </b> {{date("d M, Y")}}</small><br>
                     <small><b>=>To Show Details, Click Print Button</b></small>
                     <div class="text-primary pt-2 shadow rounded">
                         <h4 id="stock_position_value" class="p-1"></h4>
                     </div>
                 </div>
                 
-                
-                <div class="col-md-5 row">
+                <div class="col-md-7 row">
                     <div class="col-md-10 row">
-                        <div class="form-group col-md-5 d-none">
-                            <select class="form-control active_or_empty_stock" name="active_or_empty_stock" id="active_or_empty_stock">
-                                <option value="active">Active Stock</option>
-                                <option value="empty">Empty Stock</option>
-                            </select>
-                            <!--<small class="text-success">Coming soon-> Brand & category Filter</small>-->
-                        </div>
-                        <div class="form-group col-md-12">
+                        <div class="form-group col-md-7">
                             <select class="form-control which_stocks" name="place" id="which_stocks">
-                                @foreach($branches as $branch)
-                                    <option value="{{$branch->id}}">{{$branch->branch_name}} [{{optional($branch)->branch_address}}]</option>
+                                @foreach($all_sr as $sr)
+                                    <option value="{{$sr->id}}">{{$sr->name}} [{{optional($sr->area_info)->name}}]</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-md-6 d-none">
+                        <div class="form-group col-md-5">
                             
                             <select class="form-control" name="brands" id="brands">
                                 <option value="all">All Brands</option>
@@ -51,18 +44,9 @@
                                 
                             </select>
                         </div>
-                        <div class="form-group col-md-6 d-none">
-                            <select class="form-control" name="categories" id="categories">
-                                <option value="all">All Categories</option>
-                                @foreach($categories as $category)
-                                    <option value="{{$category->id}}">{{$category->cat_name}}</option>
-                                @endforeach
-                                
-                            </select>
-                        </div>
                     </div>
                     
-                    <div class="col-md-2 text-left">
+                    <div class="col-md-2 text-left d-none">
                          <button type="submit" class="btn btn-primary btn-sm">Print</button> 
                          <input type="hidden" name="" id="toggle_yes" value='1'>
                     </div>
@@ -92,12 +76,10 @@
 
 
 <!-- END Page Content -->
-
 <script type="text/javascript">
 
     $(document).ready(function () {
-        change_stock_or_place();
-        //get_data('active','godown');
+        get_data('active','godown');
         get_product_stock_value('godown');
         $('select.which_stocks').on('change', function() {
             change_stock_or_place();

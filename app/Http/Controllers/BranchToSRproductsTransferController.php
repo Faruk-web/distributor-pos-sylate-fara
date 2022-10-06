@@ -197,14 +197,13 @@ class BranchToSRproductsTransferController extends Controller
             
             $insert = BranchToSRproductsTransfer::insert(['shop_id'=>$shop_id, 'user_id'=>Auth::user()->id, 'invoice_id'=>$invoice_id, 'sender_branch_id'=>$sender_branch, 'sr_id'=>$sr_id, 'note'=>$request->note, 'date'=>$date, 'created_at'=>$current_time]);
             if($insert) {
-                
-                DB::table('moments_traffics')->insert(['shop_id' => $shop_id, 'user_id' => Auth::user()->id, 'info' => 'Stock Out from Branch To SR Transfer. Invoice num '.$invoice_id, 'created_at' => $current_time]);
+                DB::table('moments_traffics')->insert(['shop_id' => $shop_id, 'user_id' => Auth::user()->id, 'info' => 'Stock Out from Branch To SR Transfer (BTSR). Invoice num '.$invoice_id, 'created_at' => $current_time]);
                 return Redirect()->route('b.to.sr.transfer.index')->with('success', 'Stock Out from Branch To SR Transfer Successfully done.');
             }
             else {
                 return Redirect()->back()->with('error', 'Sorry something is wrong, please try again.');
             }
-            
+
         }
         else {
             return Redirect()->back()->with('error', 'Sorry you can not access this page');
@@ -217,9 +216,60 @@ class BranchToSRproductsTransferController extends Controller
      * @param  \App\Models\BranchToSRproductsTransfer  $branchToSRproductsTransfer
      * @return \Illuminate\Http\Response
      */
-    public function show(BranchToSRproductsTransfer $branchToSRproductsTransfer)
+    public function show()
     {
-        //
+        if(User::checkPermission('admin.branch.to.sr.transfer.products') == true){
+            $all_sr = User::Where(['active'=> 1, 'type'=>'SR'])->orderBy('name', 'ASC')->get();
+            $brands = DB::table('brands')->where('shop_id', Auth::user()->shop_id)->get();
+            $wing = 'main';
+            return view('cms.sr.stock_in.sr_stocks', compact('wing', 'all_sr', 'brands'));
+        }
+        else {
+            return Redirect()->back()->with('error', 'Sorry you can not access this page');
+        }
+    }
+
+    
+    public function branch_and_godown_product_stock_data(Request $request, $place, $active_or_empty)
+    {
+        if ($request->ajax()) {
+            $shop_id = Auth::user()->shop_id;
+            
+            if($active_or_empty == 'active') {
+                if($place == 'godown') {
+                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where(['product_stocks.branch_id'=>'G', 'product_stocks.shop_id'=>$shop_id])->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
+                }
+                else {
+                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
+                }
+            }
+            elseif($active_or_empty == 'empty') {
+                if($place == 'godown') {
+                    $products = DB::table('products')->where(['shop_id'=>$shop_id, 'active'=>1])->where('G_current_stock', '<=', 0)->get(['p_name', 'p_unit_type', 'p_brand', 'G_current_stock', 'id', 'barCode', 'purchase_price', 'selling_price']);
+                }
+                else {
+                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '<=', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
+                }
+            }
+
+            return Datatables::of($products)
+                ->addIndexColumn()
+                ->addColumn('stock', function($row){
+                    $unit_type = DB::table('unit_types')->where('id', $row->p_unit_type)->first('unit_name');
+                    return (optional($row)->stock + 0)." ".optional($unit_type)->unit_name;
+                })
+                ->addColumn('product_name', function($row){
+                    $v_name = '';
+                    if($row->variation_id != 0 && $row->variation_id != '') { $vinfo = DB::table('variation_lists')->where(['id'=>$row->variation_id])->first(); $v_name =  '<span class="text-success">('.optional($vinfo)->list_title.')</span>'; }
+                    return $row->p_name.$v_name."<br><small class='text-primary'><b>Lot: </b>".$row->lot_number.", <b>Sales Price: </b>".number_format($row->sales_price, 2)."TK, <b>Discount: </b>".$row->discount."(".$row->discount_amount."), <b>VAT: </b>".$row->vat."%";
+                })
+                ->addColumn('action', function($row){
+                    return '<a type="button" href="'.url('/stock/change-product-stock-info/'.$row->id).'" class="btn btn-success btn-sm" ><i class="fas fa-sync text-light"></i></a>';
+                })
+                
+                ->rawColumns(['product_name', 'stock', 'action'])
+                ->make(true);
+        }
     }
 
     /**
