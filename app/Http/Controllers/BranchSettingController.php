@@ -19,6 +19,7 @@ use App\Models\Product;
 use App\Models\PointRedeemInfo;
 use App\Models\Shop_setting;
 use App\Models\Purchase_lines;
+use App\Models\Area;
 
 
 class BranchSettingController extends Controller
@@ -1124,9 +1125,7 @@ class BranchSettingController extends Controller
     
     
     
-    
-    
-    
+
     
     // Start ========================================================================================= Sell New =================== Sell New =======>
 
@@ -1134,30 +1133,15 @@ class BranchSettingController extends Controller
     public function branch_sell_new() {
         if(User::checkMultiplePermission(['branch.sell', 'others.sell']) == true){
             $shop_id = Auth::user()->shop_id;
-            $customer_info = DB::table('customers')->where(['shop_id'=>$shop_id, 'code'=>$shop_id.'WALKING'])->first();
-            $branch_id = Auth::user()->branch_id;
-            //return "hello";
-            if(empty($branch_id)) {
-                $branch_id = Auth::user()->shop_info->default_branch_id_for_sell; 
-                if(empty($branch_id)) { 
-                    return Redirect()->route('admin.shop_setting')->with('error', 'Sorry! Please set default sell branch from settings.');
-                }
-            }
+            $all_area = Area::where(['shop_id'=>$shop_id])->get();
+            $all_sr = User::Where(['active'=> 1, 'type'=>'SR', 'shop_id'=>Auth::user()->shop_id])->orderBy('name', 'ASC')->get();
             
-            $branch_info = Branch_setting::where('id', $branch_id)->first();
+            $categories = Category::where('shop_id', $shop_id)->where('active', 1)->get(['cat_name', 'id']);
+            $brands = Brand::where('shop_id', $shop_id)->where('active', 1)->get(['brand_name', 'id']);
             
-            if(!empty($customer_info->id)) {
-                $categories = Category::where('shop_id', $shop_id)->where('active', 1)->get(['cat_name', 'id']);
-                $brands = Brand::where('shop_id', $shop_id)->where('active', 1)->get(['brand_name', 'id']);
-                
-                $delivery_man = DB::table('users')->where(['shop_id'=>$shop_id, 'type'=>'delivery_man', 'active'=>1])->where(function ($query) use ($branch_id) { $query->where('branch_id', '=', $branch_id)->orWhere('branch_id', '=', null); })->get(['name', 'id', 'phone']);
-                $banks = DB::table('banks')->where('shop_id', $shop_id)->get(['bank_name', 'id', 'bank_branch']);
-                return view('cms.branch.sell.pos_new', compact('customer_info', 'categories', 'delivery_man', 'banks', 'branch_info', 'brands'));
-            }
-            else {
-                return Redirect()->back()->with('error', 'Walking customer not found, Please contact with support!!!');
-               // return view('cms.branch.sell.pos_new', compact('customer_info', 'wing', 'branch_info'));
-            } 
+            $banks = DB::table('banks')->where('shop_id', $shop_id)->get(['bank_name', 'id', 'bank_branch']);
+            return view('cms.branch.sell.pos_new', compact('categories',  'banks', 'all_sr', 'brands', 'all_area'));
+            
         }
         else {
             return Redirect()->back()->with('error', 'Sorry you can not access this page');
@@ -1165,32 +1149,73 @@ class BranchSettingController extends Controller
 
     }
     //End:: Branch Product Sell
+
+    //Begin:: SR customer for sell
+    public function branch_search_sr_for_sale(Request $request) {
+        $output = '';
+        $shop_id = Auth::user()->shop_id;
+        $sr_info = $request->get('sr_info');
+       
+          $results = User::where('shop_id', '=', $shop_id)
+                        ->where('active', 1)
+                        ->where('type', 'SR')
+                        ->where(function ($query) use ($sr_info) {
+                            $query->where('phone', 'LIKE', '%'. $sr_info. '%')
+                                ->orWhere('name', 'LIKE', '%'. $sr_info. '%');
+                        })
+                        ->limit(8)
+                        ->get(['name', 'phone', 'id', 'sr_area_id']);
+          
+          if(!empty($sr_info)) {
+              if(count($results) > 0) {
+                foreach ($results as $sr) {
+                    $output.='<tr>'.
+                        '<td>'.$sr->name.'</td>'.
+                        '<td>'.$sr->phone.'</td>'.
+                        '<td>'.optional($sr->area_info)->name.'</td>'.
+                        '<td><button type="button" onclick="select_sr('.optional($sr)->id.', \''.optional($sr)->name.'\', \''.optional($sr)->phone.'\', \''.optional($sr->area_info)->name.'\')" class="btn bg-success btn-sm rounded-pill p-2 text-light">Select</button></td>'.
+                        '</tr>';
+                    }
+              }
+              else {
+                $output.='<tr><td colspan="6" class="text-center"><h2>No SR Found!!!</h2></td></tr>';
+            }
+            
+        }
+        
+        return Response($output);
+    }
+
+    
     
     //Begin:: search customer for sell
     public function branch_search_customer_new(Request $request) {
         $output = '';
         $shop_id = Auth::user()->shop_id;
         $customer_info = $request->get('customer_info');
-       
-          $customers = DB::table('customers')
-                ->where('shop_id', '=', $shop_id)
+        $area = $request->get('search_custoemr_area');
+        
+          $customers = Customer::where('shop_id', '=', $shop_id)
                 ->where('active', 1)
                 ->where(function ($query) use ($customer_info) {
                     $query->where('phone', 'LIKE', '%'. $customer_info. '%')
                         ->orWhere('code', 'LIKE', '%'. $customer_info. '%')
                         ->orWhere('name', 'LIKE', '%'. $customer_info. '%');
-                })
-                ->limit(5)
-                ->get(['name', 'phone', 'code']);
-          
-          
+                });
+                
+                if($area != 'all') {
+                  $customers = $customers->where('area_id', $area);
+                }
+                $customers = $customers->limit(5);
+                $customers = $customers->get(['name', 'phone', 'code', 'area_id']);
+                
           if(!empty($customer_info)) {
               if(count($customers) > 0) {
                 foreach ($customers as $customer) {
                     $output.='<tr>'.
                         '<td>'.$customer->name.'</td>'.
                         '<td>'.$customer->phone.'</td>'.
-                        '<td>'.$customer->code.'</td>'.
+                        '<td>'.optional($customer->area_info)->name.'</td>'.
                         '<td><button type="button" onclick="search_customer_info(\''.optional($customer)->code.'\')" class="btn bg-success rounded-pill p-2 text-light">Select</button></td>'.
                         '</tr>';
                     }
@@ -1203,6 +1228,8 @@ class BranchSettingController extends Controller
         
         return Response($output);
     }
+
+
     
     
     public function search_customer_info_new(Request $request) {

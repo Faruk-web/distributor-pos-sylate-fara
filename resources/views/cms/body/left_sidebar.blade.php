@@ -383,6 +383,7 @@
                     </ul>
                 </li>
                 @endif
+                {{--
                 @if($user->hasPermissionTo('admin.sms.panel') || $user->type == 'owner')
                 <li class="nav-main-item">
                     <a class="nav-main-link nav-main-link-submenu active" data-toggle="submenu" aria-haspopup="true"
@@ -399,7 +400,7 @@
                     </ul>
                 </li>
                 @endif
-                
+                --}}
                 
                 <li class="nav-main-heading">Others</li>
                     @if($user->hasPermissionTo('others.customers') || $user->type == 'owner')

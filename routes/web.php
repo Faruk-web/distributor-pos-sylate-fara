@@ -787,6 +787,7 @@ Route::group(['middleware' => 'auth'], function () {
         
         // Start ========================================================================================= Sell New =================== Sell New =======>
         Route::get('/branch/sell-new', [BranchSettingController::class, 'branch_sell_new'])->name('branch.sell.new');
+        Route::get('/branch/stock-out/search_sr', [BranchSettingController::class, 'branch_search_sr_for_sale']);
         Route::get('/branch/stock-out/search-customer_new', [BranchSettingController::class, 'branch_search_customer_new']);
         Route::get('/branch/sell/search_customer_info', [BranchSettingController::class, 'search_customer_info_new']);
         Route::get('/branch/search/customer_phone_new', [BranchSettingController::class, 'branch_check_customer_phone_new']);

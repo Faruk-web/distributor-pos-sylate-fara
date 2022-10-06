@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>{{$branch_info->branch_name}} - POS</title>
+	<title>Sell Point</title>
 	<meta name="description" content="Updates and statistics">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -68,7 +68,7 @@
 			   <div class="col-xl-4 col-lg-4 col-md-4 clock-main text-left">
 				<div class="clock " style="justify-content: left !important;">
 				  <div class="datetime-content">
-					<h4 class="card-label mb-0 font-weight-bold text-primary">{{$branch_info->branch_name}}</h4>
+					<h4 class="card-label mb-0 font-weight-bold text-primary">Sale Point</h4>
 				  </div>
 				 <div class="datetime-content">
 					<div id="Date"></div>
@@ -78,7 +78,8 @@
 			   
 			   <div class="col-xl-4 col-lg-4 col-md-4">
 				<div class="row">
-				    <div class="col-md-4">
+                    <div class="col-md-4"></div>
+				    <div class="col-md-4 d-none">
 				        <button disable onclick="select_customer_type('walking')" class="border-success text-center rounded form-control mb-1 rounded-pill"><i class="fas fa-walking"></i> Walking</button>
 				    </div>
 				    <div class="col-md-4">
@@ -87,7 +88,7 @@
 				    <div class="col-md-4">
 				        <button onclick="select_customer_type('add_customer')" data-toggle="modal" data-target="#modal_add_new_customer" class="border-primary p-1 text-center rounded form-control mb-1 rounded-pill"><i class="fa fa-plus"></i> Customer</button>
 				    </div>
-                    <input type="hidden" name="" id="walking_customer_code" value="{{optional($customer_info)->code}}">
+                    <input type="hidden" name="" id="walking_customer_code" value="">
 				</div>
 			   </div>
 			   
@@ -199,10 +200,53 @@
 	       {{-- <form action="{{url('/branch/new_sell_confirm_by_ajax_new')}}" id="order_confirm" method="post"> --}}
 	       <form action="javascript:void(0)" id="order_confirm" method="post">
             @csrf
-			<div class="row">
+            <div id="first_step_row">
+                <div class="card card-custom gutter-b bg-white border-0">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-5 p-1">
+                                <div class="justify-content-between colorfull-select shadow p-2">
+                                    <label class="text-dark d-flex"><span class="text-danger">*</span>Search SR</label>
+                                    <input type="text" class="form-control" id="sr_search" placeholder="Search by SR info [ name, phone ]" name="sr_search">
+                                    <input type="hidden" name="sr_id" id="sr_id" value="">
+                                    <div class="">
+                                        <table class="table table-bootstrap">
+                                            <tbody id="sr_search_output_info"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 p-1">
+                                <div class="form-group shadow p-2">
+                                    <label class="text-dark d-flex"><span class="text-danger">*</span>Method</label>
+                                    <select name="order_method" class="form-control" id="order_method">
+                                        <option value="0">-- Select Method --</option>
+                                        <option value="make_invoice">Make Invoice</option>
+                                        <option value="make_invoice_with_product_delivery">Make Invoice With Product Delivery</option>
+                                    </select>
+                                    <div class="">
+                                        <table class="table table-bootstrap">
+                                            <tbody id=""></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1 p-1">
+                                <div class="form-group shadow rounded-pill border mt-4 p-2">
+                                    <button type="button" onclick="order_first_step_view_controller()" class=" mt-1 bg-dark text-center text-light rounded form-control mb-1 rounded-pill">Next</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+			<div class="row" id="finale_step_row" style="display: show;">
 				<div class="col-xl-4 order-xl-first order-last">
-					<div class="card card-custom gutter-b bg-white border-0">
+					<div class="card card-custom gutter-b bg-white border-0" id="products_section">
 						<div class="card-body">
+                            <div id="sr_info_show"></div>
 							<div class="d-flex justify-content-between colorfull-select">
 								<div class="selectmain">
 									<select class="w-150px bag-primary" id="catValue">
@@ -253,46 +297,57 @@
 				</div>
 				
 				<div class="col-xl-6 col-lg-6 col-md-6">
-				    
 				    <div class="card bg-white border table-contentpos mb-3" style="background-color: #fff !important;">
 							<div class="card-body row" style="padding: 9px !important;">
 							    <div class="col-md-12">
-							        <div class="justify-content-between colorfull-select" style="display: none;" id="search_customer_shown">
-										<label class="text-dark d-flex">Search a Customer</label>
-										<input type="text" class="form-control" id="customer_search" placeholder="Search by Customer info [ name, phone ]" name="company_name">
-                                        <div class="">
+                                    <div class="row" style="display: none;" id="search_customer_shown">
+                                        <div class="col-md-6">
+                                            <div class="justify-content-between colorfull-select">
+                                                <label class="text-dark d-flex">Search a Customer</label>
+                                                <input type="text" class="form-control" id="customer_search" placeholder="Search by Customer info [ name, phone ]" name="company_name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mr-2">
+                                                <label class="control-label"><span class="text-danger">*</span>Area</label>
+                                                <select name="search_custoemr_area" class="form-control" id="search_custoemr_area">
+                                                    <option value="all">All Area</option>
+                                                    @foreach ($all_area as $area)
+                                                    <option value="{{$area->id}}">{{$area->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
                                             <table class="table table-bootstrap">
                                                 <tbody id="customer_show_info"></tbody>
                                             </table>
                                         </div>
-								    </div>
-								    
+                                    </div>
+							        
 								    <div class="justify-content-between colorfull-select row" id="customer_info_shown">
-								        <div class="col-md-8">
+								        <div class="col-md-12">
 								            <label class="border-bottom">Customer Info</label><br>
-								            <p id="customer_info_output" class="font-weight-bold">{{optional($customer_info)->name}} || {{optional($customer_info)->code}} || {{optional($customer_info)->phone}} || {{optional($customer_info)->address}}</p>
-								            <input type="hidden" class="form-control" id="customer_code" value="{{optional($customer_info)->code}}" name="customer_code">
-								            <input type="hidden" name="customer_id" id="" class="form-control" value="{{$customer_info->id}}" required>
+								            <p id="customer_info_output" class="font-weight-bold"></p>
+								            <input type="hidden" class="form-control" id="customer_code" value="" name="customer_code">
+								            <input type="hidden" name="customer_id" id="" class="form-control" value="" required>
                                             <input type="hidden" name="submit_from" id="submit_from" value="">
 								        </div>
-								        <div class="col-md-4" @if(optional($user->shop_info)->is_active_customer_points == 'no') style="display: none;" @endif>
+								        <div class="col-md-4 d-none">
 								            <label class="border-bottom">Wallet Point Info</label>
 								            <div class="d-flex justify-content-between">
-								                <h4 id="point_info_output" class="font-weight-bold d-flex"><i class='fas fa-coins mr-2'></i> <span id="customer_point_output">{{optional($customer_info)->wallets}}</span></h4>
+								                <h4 id="point_info_output" class="font-weight-bold d-flex"><i class='fas fa-coins mr-2'></i> <span id="customer_point_output"></span></h4>
 								                <button class="bg-success text-light rounded-pill ml-2 pl-2 mr-5" id="convert_button" onclick="convert_point_to_tk()" style="display: none;">Convert</button>
 								            </div>
-								            
 								        </div>
 								    </div>
-								    
 							    </div>
-							    
 							</div>	
 						</div>
 				    
 				     <div class="card bg-white border-0 table-contentpos">
 						<div class="card card-custom bg-white border-0 table-contentpos">
-                                <div class="form-group row">
+                                <div class="form-group row d-none">
                                     <div class="col-md-10">
                                         <div class="input-group">
                                         <div class="input-group-prepend">
@@ -385,7 +440,7 @@
 										
 										
 									  </tr>
-									  
+									  {{--
 									  @if($branch_info->vat_status == 'yes' && optional($user->shop_info)->vat_type == 'total_vat')
                                         <tr class="d-flex align-items-center justify-content-between">
     										<th class="border-0 font-size-h5 mb-0 font-size-bold text-dark">VAT ({{$branch_info->vat_rate}}%)</th>
@@ -397,6 +452,10 @@
     								  <input type="hidden" id="vat" name="vat" value="0" />
     								  <input type="hidden" id="vat_price" name="vat_price" value="0" />
                                       @endif
+                                      --}}
+                                      <input type="hidden" id="vat" name="vat" value="0" />
+    								  <input type="hidden" id="vat_price" name="vat_price" value="0" />
+
 									  
 									  <tr class="d-flex align-items-center justify-content-between">
 										<th class="border-0 ">
@@ -521,23 +580,6 @@
                                                                 <label for="date">Paid</label>
                                                                 <input type="number" name="full_payment" id="full_payment" class="form-control" value="0" step=any readonly />
                                                             </div>
-                                                            <div class="row">
-                                                                <div class="form-group col-md-6">
-                                                                    <label for="date" class="fw-bold">Change Amount</label>
-                                                                    <input type="number" name="change_amount" id="change_amount" class="form-control" value="" step=any />
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <label for="date" class="fw-bold">Return Change</label>
-                                                                    <h2 class="fw-bold change_return_div">7898</h2>
-                                                                </div>
-                                                                <div class="col-md-12 p-2">
-                                                                    <div class="bg-dark rounded text-center text-light">
-                                                                        <span><b class="text-secondary">Note:</b> If you not interested to use change amount feature, click Submit Button</span>
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                            </div>
-                                                            
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-danger close_modal" data-dismiss="modal">Close</button>
@@ -552,7 +594,7 @@
                                         
                                         
                                         <!--this is for Partial Payment Start-->
-                                        <div class="col-md-12" id="partial_payment_div" style="display: none;">
+                                        <div class="col-md-12" id="partial_payment_div">
                                             <button type="button"  onclick="payment_for('partial_payment')" class="bg-warning text-center text-light rounded form-control mb-1 rounded-pill"
                                                 data-toggle="modal" data-target="#partialPayment">Partial Payment</button>
 
@@ -593,7 +635,7 @@
                                         </div>
                                         <!--this is for Partial Payment End-->
 
-                                        
+                                        {{--
                                         @if($branch_info->online_sell_status == 'yes')
                                         <div class="col-md-12"  id="cash_on_payment_div" style="display: none;">
                                             <button type="button"  onclick="payment_for('cash_on_payment')" class="bg-info text-center text-light rounded form-control mb-1 rounded-pill"
@@ -663,11 +705,10 @@
                                         </div>
                                         <!--this is for Cash On Delivery Payment End-->
                                         @endif
-                                    
+                                    --}}
                                         <!--this is for MFS Payment Start-->
                                         <div class="col-md-12">
                                             <button type="button"  onclick="payment_for('cheque_payment')" class="bg-dark text-center text-light rounded form-control mb-1 rounded-pill" data-toggle="modal" data-target="#takeMFS">MFS or CARD</button>
-                                            
                                             
                                             <!-- Modal -->
                                             <div class="modal fade" id="takeMFS" tabindex="-1" role="dialog"
@@ -775,7 +816,8 @@
                                         </div>
                                         <!--this is for MFS Payment End-->
                                         
-                                        <!--this is for Full Payment Start-->
+                                        {{--
+                                        <!--this is for multiple Payment Start-->
                                         <div class="col-md-12">
                                             <button type="button"  onclick="payment_for('multiple')" class="bg-secondary text-center text-light rounded form-control mb-1 rounded-pill"
                                                 data-toggle="modal" data-target="#multiple_Payment">Multiple Pay</button>
@@ -856,8 +898,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!--this is for Full Payment End-->
-                                        
+                                        <!--this is for multiple Payment End-->
+                                        --}}
                                         
                                     </div>
 						</div>	
@@ -888,11 +930,19 @@
                         <input type="text" name="name" class="form-control" id="add_new_customer_name" >
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="filebutton"><span
-                                class="text-danger">*</span>Phone Number (max: 11)</label>
+                        <label class="control-label" for="filebutton"><span class="text-danger">*</span>Phone Number (max: 11)</label>
                         <input type="text" maxlength="11" name="phone" class="form-control"
                             id="check_customer_phone_from_sell" required>
                         <div id="add_customer_phone_output"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"><span class="text-danger">*</span>Area</label>
+                        <select name="add_customer_area" class="form-control" id="add_customer_area">
+                            <option value="">-- Select Area --</option>
+                            @foreach ($all_area as $area)
+                            <option value="{{$area->id}}">{{$area->name}}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <div class="block-content block-content-full text-right border-top">
@@ -937,14 +987,57 @@
 <script>
 
 
-    // Begin:: Customer Search for stock in
+    // Begin:: SR Search for stock
+    $('#sr_search').keyup(function () {
+        var sr_info = $(this).val();
+        $.ajax({
+            type: 'get',
+            url: '/branch/stock-out/search_sr',
+            data: {
+                'sr_info': sr_info
+            },
+            beforeSend: function() {
+                $('#header_loadning').show();
+            },
+            success: function (data) {
+                $('#sr_search_output_info').html(data);
+                $('#header_loadning').hide();
+            }
+        });
+    });
+    // End:: SR Search for stock
+
+    function select_sr(id, name, phone, area_name) {
+        $('#sr_info_show').html("<div class='mb-3 shadow rounded p-1'>SR Name: "+name+", Phone: "+phone+", Area: "+area_name+"</div>");
+        $('#sr_search_output_info').text("Name: "+name+", Phone: "+phone+", Area: "+area_name);
+        $('#sr_search').val(name);
+        $('#sr_id').val(id);
+    }
+
+    function order_first_step_view_controller() {
+        var sr_id = $('#sr_id').val();
+        var order_method = $('#order_method').val();
+        if(sr_id != '' && order_method != 0) {
+            $('#first_step_row').hide();
+            $('#finale_step_row').show();
+        }
+        else {
+            error("Please Select SR or Method");
+        }
+    }
+
+    
+    // Begin:: Customer Search for stock
     $('#customer_search').keyup(function () {
         var customer_info = $(this).val();
+        var search_custoemr_area = $('#search_custoemr_area').val();
+        
         $.ajax({
             type: 'get',
             url: '/branch/stock-out/search-customer_new',
             data: {
-                'customer_info': customer_info
+                'customer_info': customer_info,
+                'search_custoemr_area': search_custoemr_area,
             },
             beforeSend: function() {
                 $('#header_loadning').show();
@@ -955,7 +1048,9 @@
             }
         });
     });
-    // End:: Customer Search for stock in
+    // End:: Customer Search for stock
+
+
 
 
     // Begin:: Add New Customer phone number check
@@ -1623,17 +1718,6 @@ function payment_for(track) {
         
         var customer_code = $('#customer_code').val();
         
-        if(walking_customer_code == customer_code) {
-            var totaL_pay = $('#total_payable').val();
-            $('#mfs_paid').val(totaL_pay);
-            $('#mfs_paid').prop('readonly', true);
-            $('#mfs_current_due').val(0);
-        }
-        else {
-            $('#mfs_paid').val('');
-            $('#mfs_paid').prop('readonly', false);
-            $('#mfs_current_due').val('');
-        }
         
         $('#multiple_pay_tbody').html('');
         $('#select_multiple_payment_type').val(0);
@@ -1750,7 +1834,6 @@ function order_confirm(e) {
             }
         });
 
-
         $.ajax({
             url: "{{ url('/branch/new_sell_confirm_by_ajax_new')}}",
             method: 'post',
@@ -1853,22 +1936,10 @@ function clear_add_customer_form_data() {
 var wallet_status = $('#wallet_status').val();
 
 function select_customer_type(type) {
-    if(type == 'walking') {
-        $('#customer_info_shown').show();
-        $('#search_customer_shown').hide();
-        $('#delivery_others_crg').val(0);
-        $('#cash_on_delivery_paid').val(0);
-        set_customer_info('Walking Customer', '11111111111', 'none', walking_customer_code, 0, 0, 0);
-    }
-    else if(type == 'search') {
-        $('#customer_info_shown').hide();
-        $('#search_customer_shown').show();
-        $('#customer_search').focus();
-        $('#customer_search').val('');
-    }
-    else if(type == 'add_customer') {
-        clear_add_customer_form_data();
-    }
+    $('#customer_info_shown').hide();
+    $('#search_customer_shown').show();
+    $('#customer_search').focus();
+    $('#customer_search').val('');
 }
 
 function search_customer_info(code) {
@@ -1923,32 +1994,21 @@ function set_customer_info(name, phone, address, code, wallet_point, wallet_bala
         $('#customer_info_output').text(name+" || "+code+" || "+phone+" || "+address);
         $('#customer_code').val(code);
         
-        $('#customer_point_output').text(wallet_point);
-        if(wallet_point > 0) { $('#convert_button').show(); }else { $('#convert_button').hide(); }
+        // $('#customer_point_output').text(wallet_point);
+        // if(wallet_point > 0) { $('#convert_button').show(); }else { $('#convert_button').hide(); }
         
-        if(wallet_status == 1) {
-            $('#wallet_balance_show_td').text(wallet_balance);
-            $('#wallet_balance_for_db').val(wallet_balance);
-        }
-        else { $('#wallet_balance_for_db').val(0); }
+        // if(wallet_status == 1) {
+        //     $('#wallet_balance_show_td').text(wallet_balance);
+        //     $('#wallet_balance_for_db').val(wallet_balance);
+        // }
+        // else { $('#wallet_balance_for_db').val(0); }
         
-        console.log(wallet_balance);
+        // console.log(wallet_balance);
         
         $('#previous_due_show_td').text(balance);
         $('#previous_due').val(balance);
         
         success(phone+" Customer Info Set Successfully.");
-        
-        if(code == walking_customer_code) {
-            $('#partial_payment_div').hide();
-            $('#cash_on_payment_div').hide();
-            $('#sms_status').hide();
-        }
-        else {
-            $('#partial_payment_div').show();
-            $('#cash_on_payment_div').show();
-            $('#sms_status').show();
-        }
         
         calculateSum();
     }
@@ -2022,23 +2082,6 @@ function calculate_multiple_payment() {
 	var total_payable = $('#total_payable').val();
 	var due = parseFloat(total_payable) - parseFloat(total);
 	$('#multiple_payment_due').text(due.toFixed(2));
-	
-	var customer_code = $('#customer_code').val();
-        
-    if(walking_customer_code == customer_code) {
-        if(total == total_payable) {
-            $('#multiple_payment_warning_div').hide();
-            $('#multiple_payment_submit_div').show();
-        }
-        else {
-            $('#multiple_payment_warning_div').show();
-            $('#multiple_payment_submit_div').hide();
-        }
-    }
-    else {
-        $('#multiple_payment_warning_div').hide();
-        $('#multiple_payment_submit_div').show();
-    }
 	
 }
 

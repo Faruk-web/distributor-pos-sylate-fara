@@ -220,7 +220,7 @@ class BranchToSRproductsTransferController extends Controller
     public function show()
     {
         if(User::checkPermission('admin.branch.to.sr.transfer.products') == true){
-            $all_sr = User::Where(['active'=> 1, 'type'=>'SR'])->orderBy('name', 'ASC')->get();
+            $all_sr = User::Where(['active'=> 1, 'type'=>'SR', 'shop_id'=>Auth::user()->shop_id])->orderBy('name', 'ASC')->get();
             $brands = DB::table('brands')->where('shop_id', Auth::user()->shop_id)->get();
             $wing = 'main';
             return view('cms.sr.stock_in.sr_stocks', compact('wing', 'all_sr', 'brands'));
