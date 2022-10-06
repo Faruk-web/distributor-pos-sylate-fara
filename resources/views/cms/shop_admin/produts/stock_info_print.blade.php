@@ -26,51 +26,18 @@ function unit_type_info($id) {
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="" crossorigin="anonymous">
 
-    <title>{{date("d M, Y h:i:s a")}}, {{$active_or_empty}} Products Summery of {{$updated_place_name}}</title>
+    <title>{{date("d M, Y h:i:s a")}}, Products Summery of {{$updated_place_name}}</title>
   </head>
   <body>
-      
     <section>
-        
-        
-        
-        
         <div class="container">
             <div class="row">
                 <div class="col-md-12 shadow rounded p-5">
                     <div>
                         <div class="table-responsive">
-                            @if($active_or_empty == 'empty')
                             <table class="table table-bordered table-sm">
                                 <thead>
-                                    <tr><th colspan="6" class="text-center"><h5>{{date("d M, Y h:i:s a")}}, {{$active_or_empty}} Products Summery of {{$updated_place_name}}</h5></th></tr>
-                                    <tr>
-                                        <th width="10%">SI.</th>
-                                        <th>Product Info</th>
-                                        <th class="text-right">Stock</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($products->chunk(100) as $product)
-                                        @foreach($product as $key => $product)
-                                            @php($key++)
-                                            @php( ($place == 'godown') ? $stock = ($product->G_current_stock)+0 : $stock = $product->stock )
-                                            @php( $total = $total + $product->purchase_price*$stock)
-                                            <tr>
-                                                <td>{{$key}}</td>
-                                                <td>{{$product->p_name}}<br><small><b>Brand: </b>{{brand_info($product->p_brand)}}</small></td>
-                                                <td>0 {{unit_type_info(optional($product)->p_unit_type)}}</td>
-                                            </tr>
-                                        @endforeach
-                                    @endforeach
-                                </tbody>
-                                
-                            </table>
-                            @else
-                            @php($stock = 0)
-                            <table class="table table-bordered table-sm">
-                                <thead>
-                                    <tr><th colspan="6" class="text-center"><h5>{{date("d M, Y h:i:s a")}}, {{$active_or_empty}} Products Summery of {{$updated_place_name}}</h5></th></tr>
+                                    <tr><th colspan="6" class="text-center"><h5>{{date("d M, Y h:i:s a")}}, Products Summery of {{$updated_place_name}} With Brand: {{$brand_title}}</h5></th></tr>
                                     <tr>
                                         <th width="5%">SI.</th>
                                         <th width="50%">Product Info</th>
@@ -110,7 +77,6 @@ function unit_type_info($id) {
                                 </tbody>
                                 
                             </table>
-                            @endif
                         </div>
                     </div>
                 </div>

@@ -16,7 +16,7 @@
     <form action="{{route('admin.report.products.current.stock.print')}}" method="post" target="_blank">
             @csrf
             <div class="row p-2">
-                <div class="col-md-7">
+                <div class="col-md-5">
                     <h4 class="text-success" id="stock_position_title">Branch Current Active Stocks</h4>
                     <small><b>=>To Show Details, Click Print Button</b></small>
                     <div class="text-primary pt-2 shadow rounded">
@@ -25,25 +25,18 @@
                 </div>
                 
                 
-                <div class="col-md-5 row">
+                <div class="col-md-7 row">
                     <div class="col-md-10 row">
-                        <div class="form-group col-md-5 d-none">
-                            <select class="form-control active_or_empty_stock" name="active_or_empty_stock" id="active_or_empty_stock">
-                                <option value="active">Active Stock</option>
-                                <option value="empty">Empty Stock</option>
-                            </select>
-                            <!--<small class="text-success">Coming soon-> Brand & category Filter</small>-->
-                        </div>
-                        <div class="form-group col-md-12">
+                        <div class="form-group col-md-8">
                             <select class="form-control which_stocks" name="place" id="which_stocks">
                                 @foreach($branches as $branch)
                                     <option value="{{$branch->id}}">{{$branch->branch_name}} [{{optional($branch)->branch_address}}]</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group col-md-6 d-none">
+                        <div class="form-group col-md-4">
                             
-                            <select class="form-control" name="brands" id="brands">
+                            <select class="form-control brands" name="brands" id="brands">
                                 <option value="all">All Brands</option>
                                 @foreach($brands as $brand)
                                     <option value="{{$brand->id}}">{{$brand->brand_name}}</option>
@@ -97,12 +90,11 @@
 
     $(document).ready(function () {
         change_stock_or_place();
-        //get_data('active','godown');
-        get_product_stock_value('godown');
+        
         $('select.which_stocks').on('change', function() {
             change_stock_or_place();
         });
-        $('select.active_or_empty_stock').on('change', function() {
+        $('select.brands').on('change', function() {
             change_stock_or_place();
         });
         
@@ -115,49 +107,23 @@
 
     function change_stock_or_place() {
         
-        var active_or_empty = $("#active_or_empty_stock option:selected" ).val();
-        var active_or_empty_text = $("#active_or_empty_stock option:selected" ).text();
+        var brands = $("#brands option:selected" ).val();
+        var brands_text = $("#brands option:selected" ).text();
         var place = $("#which_stocks option:selected" ).val();
         var which_stocks = $("#which_stocks option:selected" ).text();
-        
-        if(active_or_empty == 'active') {
-            $("#stock_position_title").addClass("text-success");
-            $("#stock_position_title").removeClass("text-danger");
-            if(place == 'godown') {
-                get_data('active','godown');
-                get_product_stock_value('godown');
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-            else {
-                get_data('active', place);
-                get_product_stock_value(place);
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-        }
-        else if(active_or_empty == 'empty') {
-            $("#stock_position_title").addClass("text-danger");
-            $("#stock_position_title").removeClass("text-success");
-            if(place == 'godown') {
-                get_data('empty','godown');
-                $('#stock_position_value').text('Stock Value: 0.00');
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-            else {
-                get_data('empty', place);
-                $('#stock_position_value').text('Stock Value: 0.00');
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-        }
 
+        get_data(brands, place);
+        get_product_stock_value(brands, place);
+        $('#stock_position_title').text(which_stocks+" Current Stock");
     }
 
-    function get_data(active_or_empty, place) {
+    function get_data(brands, place) {
         var table = $('.data-table').DataTable({
             processing: true,
             serverSide: true,
             "bDestroy": true,
             ajax: {
-                "url": "/admin/product/stock-data/"+place+"/"+active_or_empty,
+                "url": "/admin/product/stock-data/"+place+"/"+brands,
             },
             columns: [
                 {data: 'product_name', name: 'product_name'},
@@ -172,12 +138,13 @@
         });
     }
     
-    function get_product_stock_value(place) {
+    function get_product_stock_value(brands, place) {
         $.ajax({
             type: 'get',
             url: "/admin/product/stock-value",
             data: {
-                'place': place
+                'place': place,
+                'brands': brands,
             },
             beforeSend: function() {
                 $('#stock_position_value').html('<div class="text-center"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></div>');

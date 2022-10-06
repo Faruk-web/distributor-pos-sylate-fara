@@ -55,7 +55,7 @@
                             </div>
                         </div>
                             
-                            <div class="form-group col-md-12">
+                            <div class="form-group col-md-12 d-none">
                                 <label for="example-text-input">Set Default Branch To Sell From Admin Wing.</label>
                                 <select class="form-control" name="default_branch_id_for_sell">
                                     <option value="">Select Branch / Shop</option>
@@ -65,7 +65,6 @@
                                 </select>
                             </div>
                             
-
                         <div class="form-group col-md-12 text-right">
                             <button type="submit" class="btn btn-success" onclick="form_submit(1)" id="submit_button_1">Save</button>
                             <button type="button" disabled class="btn btn-outline-success" style="display: none;" id="processing_button_1">Processing....</button>

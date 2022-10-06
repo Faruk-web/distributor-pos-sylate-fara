@@ -572,26 +572,16 @@ class ProductController extends Controller
         }
     }
 
-    public function branch_and_godown_product_stock_data(Request $request, $place, $active_or_empty)
+    public function branch_and_godown_product_stock_data(Request $request, $place, $brands)
     {
         if ($request->ajax()) {
             $shop_id = Auth::user()->shop_id;
             
-            if($active_or_empty == 'active') {
-                if($place == 'godown') {
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where(['product_stocks.branch_id'=>'G', 'product_stocks.shop_id'=>$shop_id])->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
-                }
-                else {
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
-                }
+            if($brands == 'all') {
+                $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
             }
-            elseif($active_or_empty == 'empty') {
-                if($place == 'godown') {
-                    $products = DB::table('products')->where(['shop_id'=>$shop_id, 'active'=>1])->where('G_current_stock', '<=', 0)->get(['p_name', 'p_unit_type', 'p_brand', 'G_current_stock', 'id', 'barCode', 'purchase_price', 'selling_price']);
-                }
-                else {
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '<=', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
-                }
+            else {
+                $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->where('products.p_brand', $brands)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
             }
 
             return Datatables::of($products)
@@ -619,45 +609,24 @@ class ProductController extends Controller
     public function branch_and_godown_product_stock_value(Request $request)
     {
         $place = $request->place;
+        $brands = $request->brands;
         $shop_id = Auth::user()->shop_id;
         $total = 0;
-        
-        if($place == 'godown') {
-             
-            $branch_products = Product_stock::where('branch_id', 'G')->where('shop_id', $shop_id)->where('stock', '>', 0)->get(['purchase_price', 'stock']);
-            
-            foreach($branch_products->chunk(100) as $row) {
-                foreach($row as $product) {
-                    $total = $total + ((($product->purchase_price) + 0) * (($product->stock) + 0));
-                }
-            }
-            
-            return Response()->json('Stock Value By Purchase Price: '.number_format($total, 2));
+
+        if($brands == 'all') {
+            $products = Product_stock::where('branch_id', $place)->where('stock', '>', 0)->get(['purchase_price', 'stock']);
         }
         else {
-            
-            // $branch_products = Product_stock::select(DB::raw('SUM(product_trackers.quantity) as total_qty'), DB::raw('SUM(product_trackers.total_price) as total_price'))
-            //                   ->leftJoin('product_trackers', 'product_trackers.product_id', '=', 'product_stocks.pid')
-            //                   ->where('product_stocks.branch_id', $place)
-            //                   ->get();
-                              
-            // $branch_products = DB::table("product_stocks")
-            //           ->select("product_stocks.pid",
-            //                     DB::raw("(SELECT SUM(product_trackers.quantity) FROM product_trackers WHERE product_trackers.product_id = product_stocks.pid GROUP BY product_trackers.product_id) as purchase_qty"),
-            //                     DB::raw("(SELECT SUM(product_trackers.total_price) FROM product_trackers WHERE product_trackers.product_id = product_stocks.pid GROUP BY product_trackers.product_id) as purchase_total_price"))
-            //           ->where('product_stocks.branch_id', $place)
-            //           ->get();
-                              
-                              
-            $branch_products = Product_stock::where('branch_id', $place)->where('stock', '>', 0)->get(['purchase_price', 'stock']);
-            foreach($branch_products->chunk(100) as $row) {
-                foreach($row as $product) {
-                    $total = $total + ((($product->purchase_price) + 0) * (($product->stock) + 0));
-                }
-            }
-            return Response()->json('Stock Value By Purchase Price: '.number_format($total, 2));
+            $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->where('products.p_brand', $brands)->select('product_stocks.stock', 'product_stocks.purchase_price')->get();
         }
-          
+
+        foreach($products->chunk(100) as $row) {
+            foreach($row as $product) {
+                $total = $total + ((($product->purchase_price) + 0) * (($product->stock) + 0));
+            }
+        }
+        return Response()->json('Stock Value By Purchase Price: '.number_format($total, 2));
+
     }
     
     
@@ -665,37 +634,25 @@ class ProductController extends Controller
     public function branch_and_godown_product_stock_data_print(Request $request) {
         if(User::checkPermission('admin.branch.product.stock') == true){
             $place = $request->place;
-            $active_or_empty = $request->active_or_empty_stock;
+            $brands = $request->brands;
             $wing = "main";
-            
+            $brand_title = 'All Brands';
             $shop_id = Auth::user()->shop_id;
             $shop_info = DB::table('shop_settings')->where('shop_code', $shop_id)->first();
+
+            $branch_info = DB::table('branch_settings')->where('id', $place)->first(['branch_name', 'branch_address', 'branch_phone_1']);
+            $updated_place_name = optional($branch_info)->branch_name;
             
-            if($active_or_empty == 'active') {
-                if($place == 'godown') {
-                    $updated_place_name = 'Godown';
-                    //$products = DB::table('products')->where(['shop_id'=>$shop_id, 'active'=>1])->where('G_current_stock', '>', 0)->get(['p_name', 'p_unit_type', 'p_brand', 'G_current_stock', 'purchase_price', 'id']);
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', 'G')->Where('product_stocks.shop_id', $shop_id)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type')->get();
-                }
-                else {
-                    $branch_info = DB::table('branch_settings')->where('id', $place)->first(['branch_name', 'branch_address', 'branch_phone_1']);
-                    $updated_place_name = optional($branch_info)->branch_name;
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type')->get();
-                }
+            if($brands == 'all') {
+                $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
             }
-            elseif($active_or_empty == 'empty') {
-                if($place == 'godown') {
-                    $updated_place_name = 'Godown';
-                    $products = DB::table('products')->where(['shop_id'=>$shop_id, 'active'=>1])->where('G_current_stock', '<=', 0)->get(['p_name', 'p_unit_type', 'p_brand', 'G_current_stock', 'purchase_price', 'id']);
-                }
-                else {
-                    $branch_info = DB::table('branch_settings')->where('id', $place)->first(['branch_name', 'branch_address', 'branch_phone_1']);
-                    $updated_place_name = optional($branch_info)->branch_name;
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '<=', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type')->get();
-                }
+            else {
+                $brand_info = DB::table('brands')->where('id', $brands)->first(['brand_name']);
+                $brand_title = optional($brand_info)->brand_name;
+                $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->where('products.p_brand', $brands)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
             }
             
-            return view('cms.shop_admin.produts.stock_info_print', compact('shop_info', 'products', 'active_or_empty', 'updated_place_name', 'updated_place_name', 'place', 'wing'));
+            return view('cms.shop_admin.produts.stock_info_print', compact('shop_info', 'products', 'updated_place_name', 'place', 'wing', 'brand_title'));
             
         }
         else {

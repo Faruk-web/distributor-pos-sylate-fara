@@ -19,7 +19,7 @@
                 <div class="col-md-5">
                     <h4 class="text-success mb-2" id="stock_position_title">SR Products Stocks</h4>
                     <small><b>Date: </b> {{date("d M, Y")}}</small><br>
-                    <small><b>=>To Show Details, Click Print Button</b></small>
+                    {{--<small><b>=>To Show Details, Click Print Button</b></small>--}}
                     <div class="text-primary pt-2 shadow rounded">
                         <h4 id="stock_position_value" class="p-1"></h4>
                     </div>
@@ -35,13 +35,11 @@
                             </select>
                         </div>
                         <div class="form-group col-md-5">
-                            
-                            <select class="form-control" name="brands" id="brands">
+                            <select class="form-control brands" name="brands" id="brands">
                                 <option value="all">All Brands</option>
                                 @foreach($brands as $brand)
                                     <option value="{{$brand->id}}">{{$brand->brand_name}}</option>
                                 @endforeach
-                                
                             </select>
                         </div>
                     </div>
@@ -50,7 +48,6 @@
                          <button type="submit" class="btn btn-primary btn-sm">Print</button> 
                          <input type="hidden" name="" id="toggle_yes" value='1'>
                     </div>
-                    
                 </div>
             </div>
         </form>
@@ -79,15 +76,16 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        get_data('active','godown');
-        get_product_stock_value('godown');
+        change_stock_or_place();
+
         $('select.which_stocks').on('change', function() {
             change_stock_or_place();
         });
-        $('select.active_or_empty_stock').on('change', function() {
+
+        $('select.brands').on('change', function() {
             change_stock_or_place();
         });
-        
+
         var toggle_yes = $('#toggle_yes').val();
         if (typeof (toggle_yes) != 'undefined' && toggle_yes != null) {
             SidebarColpase();
@@ -97,49 +95,26 @@
 
     function change_stock_or_place() {
         
-        var active_or_empty = $("#active_or_empty_stock option:selected" ).val();
-        var active_or_empty_text = $("#active_or_empty_stock option:selected" ).text();
         var place = $("#which_stocks option:selected" ).val();
-        var which_stocks = $("#which_stocks option:selected" ).text();
+        var brand = $("#brands option:selected" ).val();
         
-        if(active_or_empty == 'active') {
-            $("#stock_position_title").addClass("text-success");
-            $("#stock_position_title").removeClass("text-danger");
-            if(place == 'godown') {
-                get_data('active','godown');
-                get_product_stock_value('godown');
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-            else {
-                get_data('active', place);
-                get_product_stock_value(place);
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-        }
-        else if(active_or_empty == 'empty') {
-            $("#stock_position_title").addClass("text-danger");
-            $("#stock_position_title").removeClass("text-success");
-            if(place == 'godown') {
-                get_data('empty','godown');
-                $('#stock_position_value').text('Stock Value: 0.00');
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-            else {
-                get_data('empty', place);
-                $('#stock_position_value').text('Stock Value: 0.00');
-                $('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
-            }
-        }
+        //var which_stocks = $("#which_stocks option:selected" ).text();
+        //$("#stock_position_title").addClass("text-success");
+        //$("#stock_position_title").removeClass("text-danger");
 
+        get_data(brand, place);
+        get_product_stock_value(place, brand);
+        //$('#stock_position_title').text(which_stocks+" Current "+active_or_empty_text);
+        
     }
 
-    function get_data(active_or_empty, place) {
+    function get_data(brand, place) {
         var table = $('.data-table').DataTable({
             processing: true,
             serverSide: true,
             "bDestroy": true,
             ajax: {
-                "url": "/admin/product/stock-data/"+place+"/"+active_or_empty,
+                "url": "/sr/product-stocks_data/"+place+"/"+brand,
             },
             columns: [
                 {data: 'product_name', name: 'product_name'},
@@ -154,12 +129,13 @@
         });
     }
     
-    function get_product_stock_value(place) {
+    function get_product_stock_value(place, brand) {
         $.ajax({
             type: 'get',
-            url: "/admin/product/stock-value",
+            url: "/sr/product-stocks_data_value",
             data: {
-                'place': place
+                'place': place, 
+                'brand': brand, 
             },
             beforeSend: function() {
                 $('#stock_position_value').html('<div class="text-center"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></div>');

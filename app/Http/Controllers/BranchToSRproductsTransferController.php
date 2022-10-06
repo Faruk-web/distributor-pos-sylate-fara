@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 use PDF;
 use DataTables;
 use App\Models\BranchToSrTransferedProducts;
+use App\Models\SRStocks;
 
 class BranchToSRproductsTransferController extends Controller
 {
@@ -230,28 +231,18 @@ class BranchToSRproductsTransferController extends Controller
     }
 
     
-    public function branch_and_godown_product_stock_data(Request $request, $place, $active_or_empty)
+    public function stock_data(Request $request, $place, $brand)
     {
         if ($request->ajax()) {
             $shop_id = Auth::user()->shop_id;
             
-            if($active_or_empty == 'active') {
-                if($place == 'godown') {
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where(['product_stocks.branch_id'=>'G', 'product_stocks.shop_id'=>$shop_id])->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
-                }
-                else {
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '>', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
-                }
+            if($brand == 'all') {
+                $products = DB::table('s_r_stocks')->join('products', 's_r_stocks.pid', '=', 'products.id')->where('s_r_stocks.stock', '>', 0)->where('s_r_stocks.sr_id', $place)->select('s_r_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
             }
-            elseif($active_or_empty == 'empty') {
-                if($place == 'godown') {
-                    $products = DB::table('products')->where(['shop_id'=>$shop_id, 'active'=>1])->where('G_current_stock', '<=', 0)->get(['p_name', 'p_unit_type', 'p_brand', 'G_current_stock', 'id', 'barCode', 'purchase_price', 'selling_price']);
-                }
-                else {
-                    $products = DB::table('product_stocks')->join('products', 'product_stocks.pid', '=', 'products.id')->where('product_stocks.stock', '<=', 0)->where('product_stocks.branch_id', $place)->select('product_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
-                }
+            else {
+                $products = DB::table('s_r_stocks')->join('products', 's_r_stocks.pid', '=', 'products.id')->where('s_r_stocks.stock', '>', 0)->where('s_r_stocks.sr_id', $place)->where('products.p_brand', $brand)->select('s_r_stocks.*', 'products.p_name', 'products.p_brand', 'products.p_unit_type', 'products.barCode')->get();
             }
-
+            
             return Datatables::of($products)
                 ->addIndexColumn()
                 ->addColumn('stock', function($row){
@@ -264,12 +255,35 @@ class BranchToSRproductsTransferController extends Controller
                     return $row->p_name.$v_name."<br><small class='text-primary'><b>Lot: </b>".$row->lot_number.", <b>Sales Price: </b>".number_format($row->sales_price, 2)."TK, <b>Discount: </b>".$row->discount."(".$row->discount_amount."), <b>VAT: </b>".$row->vat."%";
                 })
                 ->addColumn('action', function($row){
-                    return '<a type="button" href="'.url('/stock/change-product-stock-info/'.$row->id).'" class="btn btn-success btn-sm" ><i class="fas fa-sync text-light"></i></a>';
+                    return 'Comming soon<a type="button" href="'.url('/stock/change-product-stock-info/'.$row->id).'" class="d-none btn btn-success btn-sm" ><i class="fas fa-sync text-light"></i></a>';
                 })
                 
                 ->rawColumns(['product_name', 'stock', 'action'])
                 ->make(true);
         }
+    }
+
+    public function stock_data_value(Request $request)
+    {
+        $place = $request->place;
+        $brand = $request->brand;
+        $shop_id = Auth::user()->shop_id;
+        $total = 0;
+        
+        if($brand == 'all') {
+            $products_stocks = SRStocks::where('sr_id', $place)->where('stock', '>', 0)->get(['purchase_price', 'stock']);
+        }
+        else {
+            $products_stocks = DB::table('s_r_stocks')->join('products', 's_r_stocks.pid', '=', 'products.id')->where('s_r_stocks.stock', '>', 0)->where('s_r_stocks.sr_id', $place)->where('products.p_brand', $brand)->select('s_r_stocks.purchase_price', 's_r_stocks.stock')->get();
+        }
+
+        foreach($products_stocks->chunk(100) as $row) {
+            foreach($row as $product) {
+                $total = $total + ((($product->purchase_price) + 0) * (($product->stock) + 0));
+            }
+        }
+        return Response()->json('Stock Value By Purchase Price: '.number_format($total, 2));
+          
     }
 
     /**
