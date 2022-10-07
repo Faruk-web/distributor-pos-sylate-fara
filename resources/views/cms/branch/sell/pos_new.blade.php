@@ -366,6 +366,7 @@
 												<tr>
 													<th width="60%">Product Info</th>
 													<th>Quantity</th>
+                                                    <th>Cartoon Qty</th>
 													<th>Subtotal</th>
 													<th>X</th>
 												</tr>
@@ -1020,7 +1021,8 @@
         if(sr_id != '' && order_method != 0) {
             $('#first_step_row').hide();
             $('#finale_step_row').show();
-            get_products();
+            //get_products();
+            infinteLoadMore(1);
         }
         else {
             error("Please Select SR or Method");
@@ -1125,7 +1127,6 @@
     }
 
     var ENDPOINT = "{{ url('/') }}";
-    infinteLoadMore(1);
 
     $('div#result').scroll(function () {
         if ($('#no_more_products').val() == 0) {
@@ -1225,29 +1226,50 @@
 
 var product_storage = [];
 
-function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, discount, discount_amount, vat_rate, total_stock, unit_name) {
+function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, discount, discount_amount, vat_rate, total_stock, unit_name, cartoon_quantity, cartoon_amount) {
+    
+    var customer_code = $('#customer_code').val();
+    if(customer_code == '') {
+        error("Please Select Customer!!!");
+        return 0;
+    }
+
     var v_name = '';
     if(variation_id != 0) { v_name = '<span class="text-success">('+variation_name+')</span>' }
     var generate_id = pid+'_'+variation_id+'_'+sales_price+'_'+discount+'_'+discount_amount+'_'+vat_rate+'gi';
     generate_id = generate_id.replace(".", "_");
     var flat_discount, discount_percent = 0;
-    console.log(variation_id);
+    var order_method = $('#order_method').val();
+    //console.log(variation_id);
     
     if($('#check_id_'+generate_id).val()) {
-        var cr_qty = $('#quantity_'+generate_id).val();
-        if(parseFloat(cr_qty) < parseFloat(total_stock)) {
+
+        if(order_method == 'make_invoice') {
+            var cr_qty = $('#quantity_'+generate_id).val();
             var up_qty = parseInt(cr_qty) + parseInt(1);
-           $('#quantity_'+generate_id).val(up_qty);
+            $('#quantity_'+generate_id).val(up_qty);
             var play = document.getElementById('success1').play();
             multiply();
             calculateSum();
-        } else { error("Reached Maximum Stock Qunatity!"); }
+        }
+        else if(order_method == 'make_invoice_with_product_delivery') {
+            var cr_qty = $('#quantity_'+generate_id).val();
+            if(parseFloat(cr_qty) < parseFloat(total_stock)) {
+                var up_qty = parseInt(cr_qty) + parseInt(1);
+                $('#quantity_'+generate_id).val(up_qty);
+                var play = document.getElementById('success1').play();
+                multiply();
+                calculateSum();
+            } else { error("Reached Maximum Stock Qunatity!"); }
+        }
     }
     else {
         if($('#individual_vat_status').val() === 'no'){ vat_rate = 0; }
         if(discount === 'percent') { discount_percent = discount_amount; } else if(discount === 'flat') { flat_discount = discount_amount; }
         
-         const cartDom = `<tr id="cart_tr_`+generate_id+`">
+        if(cartoon_quantity > 0){ cartoon_text= "Max Cartoon Qty = "+cartoon_quantity; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
+         
+        const cartDom = `<tr id="cart_tr_`+generate_id+`">
                             <td>
                             <input type="hidden" id="check_id_`+generate_id+`" value="`+generate_id+`">
                             <input type="hidden" name="pid[]" value="`+pid+`">

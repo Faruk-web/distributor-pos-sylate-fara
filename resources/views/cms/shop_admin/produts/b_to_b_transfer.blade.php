@@ -209,6 +209,7 @@ function myFunction(row_id, id, variation_id, variation_name, purchase_line_id, 
         document.getElementById('error').play();
     }
      else {
+        
         if(cartoon_quantity > 0){ cartoon_text= "Max Cartoon Qty = "+cartoon_amount; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
         const cartDom = `<tr id="cart_tr`+generate_id+`">
                             <td>
