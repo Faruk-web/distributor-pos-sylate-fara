@@ -242,7 +242,7 @@
                     </div>
                 </div>
             </div>
-			<div class="row" id="finale_step_row" style="display: show;">
+			<div class="row" id="finale_step_row" style="display: none;">
 				<div class="col-xl-4 order-xl-first order-last">
 					<div class="card card-custom gutter-b bg-white border-0" id="products_section">
 						<div class="card-body">
@@ -1020,6 +1020,7 @@
         if(sr_id != '' && order_method != 0) {
             $('#first_step_row').hide();
             $('#finale_step_row').show();
+            get_products();
         }
         else {
             error("Please Select SR or Method");
@@ -1049,8 +1050,6 @@
         });
     });
     // End:: Customer Search for stock
-
-
 
 
     // Begin:: Add New Customer phone number check
@@ -1096,16 +1095,19 @@
     // End:: Customer Search for stock in
 
     function get_products() {
+        var order_method = $('#order_method').val();
+        var sr_id = $('#sr_id').val();
         var product_info = $('#product_search').val();
         var category_id = $('#catValue').find(":selected").val();
-        var brand_id = $('#brandValue').find(":selected").val();
+        
         $.ajax({
             type: 'get',
             url: '/branch/product_search_into_sell_new',
             data: {
                 'product_info': product_info,
                 'category_id': category_id,
-                'brand_id': brand_id
+                'order_method': order_method,
+                'sr_id': sr_id,
             },
             beforeSend: function () {
                 $('#myUL').html('<div class="col-md-12 h4 text-center pt-5">Loading....</div>');
@@ -1136,9 +1138,11 @@
     });
 
     function infinteLoadMore(page) {
+        var order_method = $('#order_method').val();
+        var sr_id = $('#sr_id').val();
         var product_info = $('#product_search').val();
         var category_id = $('#catValue').find(":selected").val();
-        var brand_id = $('#brandValue').find(":selected").val();
+
         $.ajax({
             type: 'get',
             datatype: "html",
@@ -1146,7 +1150,8 @@
             data: {
                 'product_info': product_info,
                 'category_id': category_id,
-                'brand_id': brand_id
+                'order_method': order_method,
+                'sr_id': sr_id,
             },
             beforeSend: function () {
                 $('.auto-load').show();
@@ -1954,7 +1959,7 @@ function search_customer_info(code) {
         },
         success: function (data) {
             $('#header_loadning').hide();
-            set_customer_info(data.name, data.phone, data.address, data.code, data.point, data.wallet_balance, data.balance);
+            set_customer_info(data.name, data.phone, data.address, data.code, data.balance, data.area);
             $('#modal_add_new_customer_close_btn').click();
         }
     });
@@ -1985,13 +1990,13 @@ function convert_point_to_tk() {
 
 
 
-function set_customer_info(name, phone, address, code, wallet_point, wallet_balance, balance) {
+function set_customer_info(name, phone, address, code, balance, area) {
     if(code != null) {
         $('#customer_info_shown').show();
         $('#search_customer_shown').hide();
         $('#customer_search').val('');
         $('#customer_show_info').html('');
-        $('#customer_info_output').text(name+" || "+code+" || "+phone+" || "+address);
+        $('#customer_info_output').text(name+" || "+code+" || "+phone+" || "+address+" || Area: "+area);
         $('#customer_code').val(code);
         
         // $('#customer_point_output').text(wallet_point);
@@ -2003,13 +2008,9 @@ function set_customer_info(name, phone, address, code, wallet_point, wallet_bala
         // }
         // else { $('#wallet_balance_for_db').val(0); }
         
-        // console.log(wallet_balance);
-        
         $('#previous_due_show_td').text(balance);
         $('#previous_due').val(balance);
-        
         success(phone+" Customer Info Set Successfully.");
-        
         calculateSum();
     }
     else {

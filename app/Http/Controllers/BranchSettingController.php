@@ -1221,31 +1221,27 @@ class BranchSettingController extends Controller
                     }
               }
               else {
-                $output.='<tr><td colspan="6" class="text-center"><h2>No Customer Found!!!</h2></td></tr>';
+                $output.='<tr><td colspan="6" class="text-center"><h4 class="fw-bold text-danger">No Customer Found!!!</h4></td></tr>';
             }
             
         }
-        
+
         return Response($output);
     }
 
-
-    
-    
     public function search_customer_info_new(Request $request) {
         $output = '';
         $shop_id = Auth::user()->shop_id;
         $code = $request->code;
        
-        $customers = DB::table('customers')->where('shop_id', '=', $shop_id)->where('code', $code)->first();
+        $customers = Customer::where('shop_id', '=', $shop_id)->where('code', $code)->first();
         
         $output = [
                 'name'=>optional($customers)->name,
                 'phone'=>optional($customers)->phone,
                 'code'=>optional($customers)->code,
                 'address'=>optional($customers)->address,
-                'point'=>optional($customers)->wallets,
-                'wallet_balance'=>optional($customers)->wallet_balance,
+                'area'=>optional($customers->area_info)->name,
                 'balance'=>optional($customers)->balance,
             ];
             
@@ -1389,42 +1385,59 @@ class BranchSettingController extends Controller
         $product_info = $request->product_info;
         $brand_id = $request->brand_id;
         $shop_id = Auth::user()->shop_id;
-        $branch_id = Auth::user()->branch_id;
-        if(empty($branch_id)) {
-            $branch_id = Auth::user()->shop_info->default_branch_id_for_sell; 
-        }
+        $order_method = $request->order_method;
+        $sr_id = $request->sr_id;
         
         $price = ENV('DEFAULT_CURRENCY');
         
         DB::statement("SET SQL_MODE=''");
         
-        
-        $products = DB::table('products')
-                    ->distinct()
-                    ->leftJoin('product_stocks', function($join)
-                        {
-                            $join->on('products.id', '=', 'product_stocks.pid');
-                        })
-                    ->where(['product_stocks.branch_id'=>$branch_id, 'products.active'=>1])
-                    ->where('product_stocks.stock', '>', 0)
-                    //->select('products.id', 'products.p_name', 'product_stocks.discount', 'product_stocks.discount_amount', 'products.image', 'product_stocks.sales_price', 'product_stocks.variation_id', 'product_stocks.pid')
-                    ->select('products.p_name', 'product_stocks.discount', 'product_stocks.discount_amount', 'products.image', 'product_stocks.sales_price', 'product_stocks.variation_id', 'product_stocks.pid', 'products.vat_rate', 'products.p_unit_type', DB::raw('SUM(product_stocks.stock) as total_stock'))
-                    ->groupBy(['product_stocks.pid', 'product_stocks.sales_price', 'product_stocks.variation_id', 'product_stocks.discount', 'product_stocks.discount_amount']);
+        if($order_method == 'make_invoice') {
+            $products = DB::table('products')->where('shop_id', $shop_id)->get(['p_name', 'discount', 'discount_amount', 'image', 'selling_price as sales_price', 'variation_id', 'id', 'vat_rate', 'p_unit_type']);
+
+                        if(!empty($category_id)) {
+                            $products = $products->where('p_cat', $category_id);
+                        }
                         
+                        if(!empty($brand_id)) {
+                            $products = $products->where('p_brand', $brand_id);
+                        }
                         
-        if(!empty($category_id)) {
-            $products = $products->where('products.p_cat', $category_id);
+                        if(!empty($product_info)) {
+                            $products = $products->where('p_name', "like", "%".$product_info."%");
+                        }
+                        
+                        $products = $products->paginate(15);
+
+        }
+        else if($order_method == 'make_invoice_with_product_delivery') {
+            $products = DB::table('products')
+                        ->distinct()
+                        ->leftJoin('s_r_stocks', function($join)
+                            {
+                                $join->on('products.id', '=', 's_r_stocks.pid');
+                            })
+                        ->where(['s_r_stocks.sr_id'=>$sr_id, 'products.active'=>1])
+                        ->where('s_r_stocks.stock', '>', 0)
+                        ->select('products.p_name', 's_r_stocks.discount', 's_r_stocks.discount_amount', 'products.image', 's_r_stocks.sales_price', 's_r_stocks.variation_id', 's_r_stocks.pid', 'products.vat_rate', 'products.p_unit_type', DB::raw('SUM(s_r_stocks.stock) as total_stock'))
+                        ->groupBy(['s_r_stocks.pid', 's_r_stocks.sales_price', 's_r_stocks.variation_id', 's_r_stocks.discount', 's_r_stocks.discount_amount']);
+                        
+                        if(!empty($category_id)) {
+                            $products = $products->where('products.p_cat', $category_id);
+                        }
+                        
+                        if(!empty($brand_id)) {
+                            $products = $products->where('products.p_brand', $brand_id);
+                        }
+                        
+                        if(!empty($product_info)) {
+                            $products = $products->where('products.p_name', "like", "%".$product_info."%");
+                        }
+                        
+                        $products = $products->paginate(15);
+        
         }
         
-        if(!empty($brand_id)) {
-            $products = $products->where('products.p_brand', $brand_id);
-        }
-        
-        if(!empty($product_info)) {
-            $products = $products->where('products.p_name', "like", "%".$product_info."%");
-        }
-        
-        $products = $products->paginate(15);
         
         $variation_name = '';
         $v_name = 'no';
@@ -1443,7 +1456,6 @@ class BranchSettingController extends Controller
         else {
             $output = '<div style="text-align: center" class="h4 col-md-12 p-5">-- No Products to display --</div>';
         }
-        
         
         return Response($output);
     }
