@@ -107,7 +107,7 @@ class BranchToBranchTransferController extends Controller
                         $variation_title = optional($variation_info)->title;
                     }
                     $unit_type_info = DB::table('unit_types')->where('id', $product->p_unit_type)->first(['unit_name']);
-                    $output .= '<li class="nav-item mb-1 p-1 rounded" id="product_text" onclick="myFunction(\''.$product->id.'\', \''.$product->pid.'\', \''.$product->variation_id.'\', \''.$variation_title.'\', \''.$product->purchase_line_id.'\', \''.$product->lot_number.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->sales_price.'\', \''.$product->vat.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$product->stock.'\', \''.optional($unit_type_info)->unit_name.'\', \''.optional($product)->cartoon_quantity.'\', \''.optional($product)->cartoon_amount.'\')" title="Add me">
+                    $output .= '<li class="nav-item mb-1 p-1 rounded" id="product_text" onclick="myFunction(\''.$product->id.'\', \''.$product->pid.'\', \''.$product->variation_id.'\', \''.$variation_title.'\', \''.$product->purchase_line_id.'\', \''.$product->lot_number.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->sales_price.'\', \''.$product->vat.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$product->stock.'\', \''.optional($unit_type_info)->unit_name.'\', \''.optional($product)->is_cartoon.'\', \''.optional($product)->cartoon_quantity.'\', \''.optional($product)->cartoon_amount.'\')" title="Add me">
                         <h6 class="text-success">'.$product->p_name.' '.$variation_name.'</h6>
                         <span><b>Brand:</b> '.optional($brand_info)->brand_name.', <b>Lot Number:</b> '.$product->lot_number.', <b>Sales Price:</b> '.$product->sales_price.', <b>Discount:</b> '.$product->discount.'('.$product->discount_amount.'), <b>VAT:</b> '.$product->vat.'%</span>
                         <br><span class="text-danger"><b>Stock Unit:</b> '.$product->stock.' '.optional($unit_type_info)->unit_name.'</span>
@@ -175,7 +175,7 @@ class BranchToBranchTransferController extends Controller
                         $rest_quantity = '';
                         $rest_cartoon_qty = '';
                         
-                        $exist_check = DB::table('product_stocks')->where(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'branch_id'=>$receiver_branch, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'cartoon_quantity'=>$check_product->cartoon_quantity])->first();
+                        $exist_check = DB::table('product_stocks')->where(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'branch_id'=>$receiver_branch, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'is_cartoon'=>$check_product->is_cartoon, 'cartoon_quantity'=>$check_product->cartoon_quantity])->first();
                         
                         if(!is_null($exist_check)) {
                             $update_quantity = $exist_check->stock + $quantity;
@@ -185,7 +185,7 @@ class BranchToBranchTransferController extends Controller
                             $rest_cartoon_qty = $check_product->cartoon_amount - $cartoon_amount;
                         }
                         else {
-                            $insert = DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'branch_id'=>$receiver_branch, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'stock'=>$quantity, 'cartoon_quantity'=>$check_product->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount]);
+                            $insert = DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'branch_id'=>$receiver_branch, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'stock'=>$quantity, 'is_cartoon'=>$check_product->is_cartoon, 'cartoon_quantity'=>$check_product->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount]);
                             $rest_cartoon_qty = $check_product->cartoon_amount - $cartoon_amount;
                             $rest_quantity = $db_stock - $quantity;
                         }
@@ -207,6 +207,7 @@ class BranchToBranchTransferController extends Controller
                         $p_data['branch_id'] = $sender_branch;
                         $p_data['product_id'] = $product_id;
                         $p_data['quantity'] = $quantity;
+                        $p_data['is_cartoon'] = $check_product->is_cartoon;
                         $p_data['cartoon_quantity'] = $check_product->cartoon_quantity;
                         $p_data['cartoon_amount'] = $cartoon_amount;
                         $p_data['price'] = 0;

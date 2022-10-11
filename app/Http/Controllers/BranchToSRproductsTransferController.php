@@ -127,7 +127,7 @@ class BranchToSRproductsTransferController extends Controller
                         $rest_quantity = '';
                         $rest_cartoon_qty = '';
                         
-                        $exist_check = DB::table('s_r_stocks')->where(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'sr_id'=>$sr_id, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'cartoon_quantity'=>$check_product->cartoon_quantity])->first();
+                        $exist_check = DB::table('s_r_stocks')->where(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'sr_id'=>$sr_id, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'is_cartoon'=>$check_product->is_cartoon, 'cartoon_quantity'=>$check_product->cartoon_quantity])->first();
                         
                         if(!is_null($exist_check)) {
                             $update_quantity = $exist_check->stock + $quantity;
@@ -137,7 +137,7 @@ class BranchToSRproductsTransferController extends Controller
                             $rest_cartoon_qty = $check_product->cartoon_amount - $cartoon_amount;
                         }
                         else {
-                            $insert = DB::table('s_r_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'sr_id'=>$sr_id, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'stock'=>$quantity, 'cartoon_quantity'=>$check_product->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount]);
+                            $insert = DB::table('s_r_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$check_product->purchase_line_id, 'lot_number'=>$check_product->lot_number, 'sr_id'=>$sr_id, 'pid'=>$check_product->pid,  'variation_id'=>$check_product->variation_id, 'purchase_price'=>$check_product->purchase_price, 'sales_price'=>$check_product->sales_price, 'discount'=>$check_product->discount, 'discount_amount'=>$check_product->discount_amount, 'vat'=>$check_product->vat, 'stock'=>$quantity, 'is_cartoon'=>$check_product->is_cartoon, 'cartoon_quantity'=>$check_product->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount]);
                             $rest_cartoon_qty = $check_product->cartoon_amount - $cartoon_amount;
                             $rest_quantity = $db_stock - $quantity;
                         }
@@ -159,6 +159,7 @@ class BranchToSRproductsTransferController extends Controller
                         $p_data['branch_id'] = $sender_branch;
                         $p_data['product_id'] = $product_id;
                         $p_data['quantity'] = $quantity;
+                        $p_data['is_cartoon'] = $check_product->is_cartoon;
                         $p_data['cartoon_quantity'] = $check_product->cartoon_quantity;
                         $p_data['cartoon_amount'] = $cartoon_amount;
                         $p_data['price'] = 0;
@@ -183,6 +184,7 @@ class BranchToSRproductsTransferController extends Controller
                          $products->pid = $product_id;
                          $products->variation_id = $check_product->variation_id;
                          $products->quantity = $quantity;
+                         $products->is_cartoon = $check_product->is_cartoon;
                          $products->cartoon_quantity = $check_product->cartoon_quantity;
                          $products->cartoon_amount = $cartoon_amount;
                          $products->discount = $check_product->discount;
