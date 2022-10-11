@@ -27,6 +27,12 @@ class CreateShopSettingsTable extends Migration
             $table->string('trial_end_date')->nullable();
             $table->string('office_start_time')->nullable();
             $table->string('office_end_time')->nullable();
+            $table->integer('days_of_late_absent')->nullable();
+            $table->string('commission_type')->default('monthley');
+            $table->double('minimum_sell_to_get_daily_commission')->nullable();
+            $table->double('minimum_sell_to_get_monthley_commission')->nullable();
+            $table->double('commission_percent_monthley')->nullable();
+            $table->double('commission_percent_daily')->nullable();
             $table->string('is_active')->default(1);
             $table->timestamps();
         });
