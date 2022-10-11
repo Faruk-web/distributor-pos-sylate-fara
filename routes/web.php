@@ -756,9 +756,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     
 
-    
-
-
     // Begin:: Branch Route ---------------------->
 
         //Begin:: Branch Setting.
@@ -782,7 +779,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/branch/product-stock', [ProductStockController::class, 'index'])->name('branch.product.stock');
         Route::get('/branch/product-stock-data', [ProductStockController::class, 'product_stock_data'])->name('branch.product.stock.data');
         //End:: Branch Product Stock
-        
         
         
         // Start ========================================================================================= Sell New =================== Sell New =======>

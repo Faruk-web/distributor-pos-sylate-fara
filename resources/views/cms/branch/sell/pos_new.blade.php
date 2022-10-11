@@ -1227,12 +1227,12 @@
 
 var product_storage = [];
 
-function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, discount, discount_amount, vat_rate, total_stock, unit_name, cartoon_quantity, cartoon_amount) {
+function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, discount, discount_amount, vat_rate, total_stock, unit_name, is_cartoon, cartoon_quantity, cartoon_amount) {
     
     var customer_code = $('#customer_code').val();
     if(customer_code == '') {
-        //error("Please Select Customer!!!");
-        //return 0;
+        error("Please Select Customer!!!");
+        return 0;
     }
 
     var v_name, cartoon_text, cartoon_status = '';
@@ -1241,7 +1241,6 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
     generate_id = generate_id.replace(".", "_");
     var flat_discount, discount_percent = 0;
     var order_method = $('#order_method').val();
-    //console.log(variation_id);
     
     if($('#check_id_'+generate_id).val()) {
 
@@ -1250,7 +1249,7 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
             var up_qty = parseInt(cr_qty) + parseInt(1);
             $('#quantity_'+generate_id).val(up_qty);
             var play = document.getElementById('success1').play();
-            changeQuantity(generate_id, cartoon_quantity, cartoon_amount);
+            changeQuantity(generate_id, is_cartoon, cartoon_quantity, cartoon_amount);
             //multiply();
             //calculateSum();
         }
@@ -1260,7 +1259,7 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                 var up_qty = parseInt(cr_qty) + parseInt(1);
                 $('#quantity_'+generate_id).val(up_qty);
                 var play = document.getElementById('success1').play();
-                changeQuantity(generate_id, cartoon_quantity, cartoon_amount);
+                changeQuantity(generate_id, is_cartoon, cartoon_quantity, cartoon_amount);
                 // multiply();
                 // calculateSum();
             } else { error("Reached Maximum Stock Qunatity!"); }
@@ -1270,18 +1269,19 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
         if($('#individual_vat_status').val() === 'no'){ vat_rate = 0; }
         if(discount === 'percent') { discount_percent = discount_amount; } else if(discount === 'flat') { flat_discount = discount_amount; }
         
-        //if(cartoon_quantity > 0){ cartoon_text= "Max Cartoon Qty = "+cartoon_quantity; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
+        if(is_cartoon == 1){ 
+            if(order_method == 'make_invoice'){
+                cartoon_text= cartoon_quantity+" = 1 Cartoon";
+            }
+            else if(order_method == 'make_invoice_with_product_delivery'){
+                cartoon_text= "Max = "+(total_stock/cartoon_quantity)+" Cartoon<br>"+cartoon_quantity+" = 1 Cartoon";
+            }
+        }
+        else {  
+            cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; 
+        }
          
-        if(order_method == 'make_invoice' && cartoon_amount == 1){
-            cartoon_text= cartoon_quantity+" = 1 Cartoon";
-        }
-        else if(order_method == 'make_invoice_with_product_delivery' && cartoon_quantity > 0){
-            cartoon_text= "Max Cartoon Qty = "+cartoon_quantity;
-        }
-        else {
-            cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>";
-        }
-
+        
         const cartDom = `<tr id="cart_tr_`+generate_id+`">
                             <td>
                             <input type="hidden" id="check_id_`+generate_id+`" value="`+generate_id+`">
@@ -1297,11 +1297,11 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                             <div class="modal fade text-left show" id="cart_modal_`+generate_id+`" tabindex="-1" role="dialog" aria-labelledby="cart_modal_level_`+generate_id+`" aria-modal="true"><div class="modal-dialog modal-dialog-scrollable" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="cart_modal_level_`+generate_id+`">`+p_name+` `+v_name+`</h5></div><div class="modal-body"><div class="row"><div class="form-group col-md-12 col-sm-12"><label>Unit Price</label><input type="number" step=any name="price[]" id="price_`+generate_id+`" onchange="c_price('`+generate_id+`')" onkeyup="c_price('`+generate_id+`')" class="form-control pricesum" value="`+sales_price+`"></div><div class="form-group col-md-6 col-sm-6"><label>Percent Discount</label><input class="form-control discount_percent" onchange="ind_d_percent('`+generate_id+`')" onkeyup="ind_d_percent('`+generate_id+`')" type="number" step=any id="ind_p_d_amount_`+generate_id+`" name="disCP[]" value="`+discount_percent+`"></div><div class="form-group col-md-6 col-sm-6"><label>Flat Discount</label><input class="form-control flat_discount"  onchange="ind_d_flat('`+generate_id+`')" onkeyup="ind_d_flat('`+generate_id+`')" type="number" step=any id="ind_f_d_amount_`+generate_id+`" name="disC_flat[]" value="`+flat_discount+`"></div><div class="form-group col-md-12 col-sm-12"><label>VAT</label><input class="form-control individual_product_vat" name="individual_product_vat[]" type="number" readonly value="`+vat_rate+`"></div><div class="text-right col-md-12 col-sm-12"><button type="button" class="btn-secondary btn white pt-1 pb-1" data-dismiss="modal" aria-label="Close">Close</button></div></div></div></div></div></div>
                             </td>
                             <td>
-                                <input type="number" step="any" value="1" class="form-control border-dark w-100px quantity quantity`+generate_id+`" id="quantity_`+generate_id+`"  oninput="changeQuantity('`+generate_id+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')"  name="quantity[]" max="`+total_stock+`"> <span class="text-danger">
+                                <input type="number" step="any" value="1" class="form-control border-dark w-100px quantity quantity`+generate_id+`" id="quantity_`+generate_id+`"  oninput="changeQuantity('`+generate_id+`', '`+is_cartoon+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')"  name="quantity[]" max="`+total_stock+`"> <span class="text-danger">
                             </td>
                             <td>
                                 <div class="mb-2 p-1 border rounded shadow">
-                                    <input style="width:90px;" type="number" class="cartoon_amount cartoon_amount`+generate_id+`" value="0" id="cartoon_amount" `+cartoon_status+` oninput="change_cartoon_amount('`+generate_id+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')" name="cartoon_amount[]" step="any" required>
+                                    <input style="width:90px;" type="number" class="cartoon_amount cartoon_amount`+generate_id+`" value="0" id="cartoon_amount" `+cartoon_status+` oninput="change_cartoon_amount('`+generate_id+`', '`+is_cartoon+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')" name="cartoon_amount[]" step="any" required>
                                     <br><small>`+cartoon_text+`</small>
                                 </div>
                             </td>
@@ -1316,8 +1316,7 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                         
         $('#cart_body').prepend(cartDom);
         
-            calculateSum();
-            multiply();
+            changeQuantity(generate_id, is_cartoon, cartoon_quantity, cartoon_amount);
             var play = document.getElementById('success1').play();
     }
     
@@ -1326,37 +1325,26 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
 }
 
 
-function changeQuantity(generated_id, cartoon_quantity, cartoon_amount) {
-    quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, 'single_qty');
-    
+function changeQuantity(generated_id, is_cartoon, cartoon_quantity, cartoon_amount) {
+    quantity_info_change(generated_id, is_cartoon, cartoon_quantity, cartoon_amount, 'single_qty');
 }
 
-function change_cartoon_amount(generated_id, cartoon_quantity, cartoon_amount) {
-    quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, 'cartoon_qty');
+function change_cartoon_amount(generated_id, is_cartoon, cartoon_quantity, cartoon_amount) {
+    quantity_info_change(generated_id, is_cartoon, cartoon_quantity, cartoon_amount, 'cartoon_qty');
 }
 
-function quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, info) {
+function quantity_info_change(generated_id, is_cartoon, cartoon_quantity, cartoon_amount, info) {
     var order_method = $('#order_method').val();
 
-    if(order_method == 'make_invoice' && cartoon_amount == 1){
-        //cartoon_text= cartoon_quantity+" = 1 Cartoon";
-    }
-    else if(order_method == 'make_invoice_with_product_delivery' && cartoon_quantity > 0){
-        //cartoon_text= "Max Cartoon Qty = "+cartoon_quantity;
-    }
-    else {
-        cartoon_quantity = 0;
-    }
-
     if(info == 'single_qty') {
-        if(cartoon_quantity > 0) {
+        if(is_cartoon == 1) {
             var qty = $('.quantity'+generated_id).val();
             var total_cartoon = qty / cartoon_quantity;
             $('.cartoon_amount'+generated_id).val(total_cartoon.toFixed(2));
         }
     }
     else if(info == 'cartoon_qty') {
-        if(cartoon_quantity > 0) {
+        if(is_cartoon == 1) {
             var cartoon_qty = $('.cartoon_amount'+generated_id).val();
             var total_qty = cartoon_quantity * cartoon_qty;
             $('.quantity'+generated_id).val(total_qty.toFixed(2));
@@ -1914,7 +1902,6 @@ $(document).ready(function(){
 function order_confirm(e) {
     if (document.getElementById("order_confirm").checkValidity()) { 
         
-      
         e.preventDefault();
         $.ajaxSetup({
             headers: {
@@ -1992,12 +1979,15 @@ var walking_customer_code = $('#walking_customer_code').val();
 function add_new_customer() {
     var name = $('#add_new_customer_name').val();
     var phone = $('#check_customer_phone_from_sell').val();
+    var area = $('#add_customer_area').val();
+    
     $.ajax({
         type: 'get',
         url: '/branch/add-new-customer_into_pos_new',
         data: {
             'name': name,
-            'phone': phone
+            'phone': phone,
+            'area': area
         },
         beforeSend: function() {
             $('#header_loadning').show();
