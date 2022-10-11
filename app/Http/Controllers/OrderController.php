@@ -15,6 +15,8 @@ use Illuminate\Http\Response;
 use Mail;
 use App\Mail\OrderMail;
 use App\Models\Product_stock;
+use App\Models\Product;
+
 
 
 class OrderController extends Controller
@@ -587,19 +589,25 @@ class OrderController extends Controller
                 
                     $shop_id = Auth::user()->shop_id;
                     $shop_settings = DB::table('shop_settings')->where('shop_code', $shop_id)->first(['is_active_customer_points', 'sms_active_status', 'sms_limit', 'shop_name', 'point_earn_rate', 'minimum_purchase_to_get_point']);
+                    $order_method = $request->order_method;
+                    $sr_id = $request->sr_id;
                     
+/*
                     $branch_id = Auth::user()->branch_id;
                     if(empty($branch_id)) {
                         $branch_id = Auth::user()->shop_info->default_branch_id_for_sell; 
                     }
-                    $branch_info = DB::table('branch_settings')->where(['id'=>$branch_id])->first(['print_by', 'sms_status']);
                     
+                    $branch_info = DB::table('branch_settings')->where(['id'=>$branch_id])->first(['print_by', 'sms_status']);
+                    */
+
                     $pid = $request->pid;
                     
                     $customer_code = $request->customer_code;
                     
                     $customer_info = DB::table('customers')->where(['code'=>$customer_code, 'shop_id'=>$shop_id])->first(['code', 'name', 'phone', 'email', 'balance', 'id', 'wallet_balance', 'wallets']);
                     $customer_id = $customer_info->id;
+                    $area_id = optional($customer_info)->area_id;
                     
                     $paid = '';
                     $invoice_total = $request->total_payable;
@@ -614,9 +622,9 @@ class OrderController extends Controller
                     $submit_form = $request->submit_from;
                     
                     $current_time = Carbon::now();
-                    $count_total = DB::table('orders')->where(['shop_id'=>$shop_id, 'branch_id'=>$branch_id])->count('id');
+                    $count_total = DB::table('orders')->where(['shop_id'=>$shop_id, 'sr_id'=>$sr_id])->count('id');
                     $update_count = $count_total+1;
-                    $invoice_id = 'S_'.$shop_id.'_'.$branch_id.'_'.$update_count;
+                    $invoice_id = 'S_'.$shop_id.'_'.$sr_id.'_'.$update_count;
 
                     $date = date("Y-m-d", strtotime($request->date));
                     
@@ -628,6 +636,7 @@ class OrderController extends Controller
                     foreach($pid as $key => $item) {
 
                         $unit = $request->quantity[$key];
+                        $cartoon_amount = $request->cartoon_amount[$key];
                         $price = $request->price[$key];
                         $vat = $request->individual_product_vat[$key];
                         $variation_id = $request->variation_id[$key];
@@ -647,92 +656,124 @@ class OrderController extends Controller
                             $individual_discount_status = 'no';
                             $individual_discount_amount = 0;
                         }
-                        
-                        
-                        $old_price = $request->previous_price[$key];
-                        $previous_discount = $request->previous_discount[$key];
-                        $previous_discount_amount = $request->previous_discount_amount[$key];
-                        
-                        $product_check = Product_stock::Where(['pid'=>$pid[$key], 'branch_id'=>$branch_id, 'sales_price'=>$old_price, 'variation_id'=>$variation_id, 'discount'=>$previous_discount, 'discount_amount'=>$previous_discount_amount])->where('stock', '>', 0)->orderBy('lot_number', 'ASC')->get();
-                        
-                        // Individual Product with lot Wise Start
-                        if(count($product_check) > 0) {
-                           $sold_unit = $unit;
-                           $total_count = 0;
-                           foreach($product_check as $product_item) {
-                               $db_minus_unit = 0;
-                               $db_stock = $product_item->stock;
+
+                        if($order_method == 'make_invoice') { // This is for make invoice
+                            $check_product = Product::find($pid[$key]);
+                            if(!is_null($check_product)) {
+
+                                $sum_for_product = $unit * $price;
                                
-                               if($sold_unit != 0) {
-                                   
-                                   if($sold_unit >= $db_stock) {
-                                       $sold_unit = $sold_unit - $db_stock;
-                                       $db_minus_unit = $db_stock;
-                                   }
-                                   else if($db_stock >= $sold_unit) {
-                                      $db_minus_unit = $sold_unit;
-                                      $sold_unit = $sold_unit - $sold_unit;
-                                   }
-                                   
-                                   $total_count = $total_count + $db_minus_unit;
-                                   $sum_for_item = $db_minus_unit * $price;
-                                   
-                                   if($individual_discount_status == 'flat') {
-                                       $t_discount = $individual_discount_amount * $db_minus_unit;
-                                       $total_price = $sum_for_item - $t_discount;
-                                       $discount_in_tk = $t_discount;
-                                   }
-                                   else if($individual_discount_status == 'percent') {
-                                       $discountParcent_amount_tk = ($individual_discount_amount * $sum_for_item)/100;
-                                       $total_price = $sum_for_item - $discountParcent_amount_tk;
-                                       $discount_in_tk = $discountParcent_amount_tk;
-                                   }
-                                   else {
-                                       $total_price = $db_minus_unit * $price;
-                                       $discount_in_tk = 0;
-                                   }
-                                   
-                                   $vat_price = $total_price * $vat / 100;
-                                   
-                                   $total_price = $total_price + $vat_price;
-                                   
-                                   DB::table('product_trackers')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_item->purchase_line_id, 'lot_number'=>$product_item->lot_number, 'purchase_price'=>$product_item->purchase_price, 'total_purchase_price'=>optional($product_item)->purchase_price*$db_minus_unit, 'sales_price'=>$price, 'variation_id'=>$product_item->variation_id, 'branch_id'=>$branch_id, 'product_id'=>$product_item->pid, 'quantity'=>$db_minus_unit, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat'=>$product_item->vat, 'total_price'=>$total_price, 'status'=>0, 'product_form'=>'S', 'invoice_id'=>$invoice_id, 'created_at'=>$date]);
-                                   
-                                   $update_product_item = $product_item;
-                                   $update_product_item->stock = $db_stock - $db_minus_unit;
-                                   $update_product_item->update();
-                                   
-                               }
-                           }
-                           
-                           
-                           // Individual Product
-                           $sum_for_product = $total_count * $price;
-                           
-                          if($individual_discount_status == 'flat') {
-                              $ti_product_discount = $individual_discount_amount * $total_count;
-                              $total_price = $sum_for_product - $ti_product_discount;
-                              $discount_in_tk = $ti_product_discount;
-                          }
-                          else if($individual_discount_status == 'percent') {
-                              $discount_p_amount_tk = ($individual_discount_amount * $sum_for_product)/100;
-                              $total_price = $sum_for_product - $discount_p_amount_tk;
-                              $discount_in_tk = $discount_p_amount_tk;
-                          }
-                          else {
-                              $total_price = $sum_for_product;
-                              $discount_in_tk = 0;
-                          }
-                          
-                          $vat_price_ip = $total_price * $vat/100;
-                          $total_price = $total_price + $vat_price_ip;
-                          
-                          $total_gross = $total_gross + $total_price;
-                          
-                          DB::table('ordered_products')->insert(['invoice_id'=>$invoice_id, 'product_id'=>$pid[$key], 'variation_id'=>$variation_id, 'quantity'=>$unit, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat_amount'=>$vat, 'total_price'=>$total_price, 'created_at'=>$date]);
-                          // Individual Product
-                           
+                                if($individual_discount_status == 'flat') {
+                                    $ti_product_discount = $individual_discount_amount * $unit;
+                                    $total_price = $sum_for_product - $ti_product_discount;
+                                    $discount_in_tk = $ti_product_discount;
+                                }
+                                else if($individual_discount_status == 'percent') {
+                                    $discount_p_amount_tk = ($individual_discount_amount * $sum_for_product)/100;
+                                    $total_price = $sum_for_product - $discount_p_amount_tk;
+                                    $discount_in_tk = $discount_p_amount_tk;
+                                }
+                                else {
+                                    $total_price = $sum_for_product;
+                                    $discount_in_tk = 0;
+                                }
+                                
+                                $vat_price_ip = $total_price * $vat/100;
+                                $total_price = $total_price + $vat_price_ip;
+                                
+                                $total_gross = $total_gross + $total_price;
+                                
+                                DB::table('ordered_products')->insert(['invoice_id'=>$invoice_id, 'product_id'=>$pid[$key], 'variation_id'=>$variation_id, 'quantity'=>$unit, 'delivered_quantity'=>0, 'is_cartoon'=>$check_product->is_cartoon, 'cartoon_quantity'=>$check_product->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat_amount'=>$vat, 'total_price'=>$total_price, 'created_at'=>$date]);
+                                
+                            }
                         }
+                        else if($order_method == 'make_invoice_with_product_delivery') { // this is for make invoice with product delivery
+                            
+                            $old_price = $request->previous_price[$key];
+                            $previous_discount = $request->previous_discount[$key];
+                            $previous_discount_amount = $request->previous_discount_amount[$key];
+                            
+                            $product_check = Product_stock::Where(['pid'=>$pid[$key], 'branch_id'=>$branch_id, 'sales_price'=>$old_price, 'variation_id'=>$variation_id, 'discount'=>$previous_discount, 'discount_amount'=>$previous_discount_amount])->where('stock', '>', 0)->orderBy('lot_number', 'ASC')->get();
+                            
+                            // Individual Product with lot Wise Start
+                            if(count($product_check) > 0) {
+                               $sold_unit = $unit;
+                               $total_count = 0;
+                               foreach($product_check as $product_item) {
+                                   $db_minus_unit = 0;
+                                   $db_stock = $product_item->stock;
+                                   
+                                   if($sold_unit != 0) {
+                                       
+                                       if($sold_unit >= $db_stock) {
+                                           $sold_unit = $sold_unit - $db_stock;
+                                           $db_minus_unit = $db_stock;
+                                       }
+                                       else if($db_stock >= $sold_unit) {
+                                          $db_minus_unit = $sold_unit;
+                                          $sold_unit = $sold_unit - $sold_unit;
+                                       }
+                                       
+                                       $total_count = $total_count + $db_minus_unit;
+                                       $sum_for_item = $db_minus_unit * $price;
+                                       
+                                       if($individual_discount_status == 'flat') {
+                                           $t_discount = $individual_discount_amount * $db_minus_unit;
+                                           $total_price = $sum_for_item - $t_discount;
+                                           $discount_in_tk = $t_discount;
+                                       }
+                                       else if($individual_discount_status == 'percent') {
+                                           $discountParcent_amount_tk = ($individual_discount_amount * $sum_for_item)/100;
+                                           $total_price = $sum_for_item - $discountParcent_amount_tk;
+                                           $discount_in_tk = $discountParcent_amount_tk;
+                                       }
+                                       else {
+                                           $total_price = $db_minus_unit * $price;
+                                           $discount_in_tk = 0;
+                                       }
+                                       
+                                       $vat_price = $total_price * $vat / 100;
+                                       
+                                       $total_price = $total_price + $vat_price;
+                                       
+                                       DB::table('product_trackers')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_item->purchase_line_id, 'lot_number'=>$product_item->lot_number, 'purchase_price'=>$product_item->purchase_price, 'total_purchase_price'=>optional($product_item)->purchase_price*$db_minus_unit, 'sales_price'=>$price, 'variation_id'=>$product_item->variation_id, 'branch_id'=>$branch_id, 'product_id'=>$product_item->pid, 'quantity'=>$db_minus_unit, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat'=>$product_item->vat, 'total_price'=>$total_price, 'status'=>0, 'product_form'=>'S', 'invoice_id'=>$invoice_id, 'created_at'=>$date]);
+                                       
+                                       $update_product_item = $product_item;
+                                       $update_product_item->stock = $db_stock - $db_minus_unit;
+                                       $update_product_item->update();
+                                       
+                                   }
+                               }
+                               
+                               
+                               // Individual Product
+                               $sum_for_product = $total_count * $price;
+                               
+                              if($individual_discount_status == 'flat') {
+                                  $ti_product_discount = $individual_discount_amount * $total_count;
+                                  $total_price = $sum_for_product - $ti_product_discount;
+                                  $discount_in_tk = $ti_product_discount;
+                              }
+                              else if($individual_discount_status == 'percent') {
+                                  $discount_p_amount_tk = ($individual_discount_amount * $sum_for_product)/100;
+                                  $total_price = $sum_for_product - $discount_p_amount_tk;
+                                  $discount_in_tk = $discount_p_amount_tk;
+                              }
+                              else {
+                                  $total_price = $sum_for_product;
+                                  $discount_in_tk = 0;
+                              }
+                              
+                              $vat_price_ip = $total_price * $vat/100;
+                              $total_price = $total_price + $vat_price_ip;
+                              
+                              $total_gross = $total_gross + $total_price;
+                              
+                              DB::table('ordered_products')->insert(['invoice_id'=>$invoice_id, 'product_id'=>$pid[$key], 'variation_id'=>$variation_id, 'quantity'=>$unit, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat_amount'=>$vat, 'total_price'=>$total_price, 'created_at'=>$date]);
+                              // Individual Product
+                            }
+                        }
+                        
                     }
                     
                     
@@ -806,6 +847,7 @@ class OrderController extends Controller
                     
                     
                     //Wallet Charge
+                    /*
                     if($shop_settings->is_active_customer_points == 'yes' && $customer_info->code != $shop_id.'WALKING') {
                         $wallet_status = 'yes';
                         $wallet_balance = ($customer_info->wallet_balance) + 0;
@@ -827,6 +869,7 @@ class OrderController extends Controller
                         $wallet_status = 'no';
                         $wallet_balance = 0;
                     }
+                    */
                     
                     
                     if($submit_form == 'full_payment') {
@@ -887,7 +930,7 @@ class OrderController extends Controller
                     
                     $inv_data = array();
                     $inv_data['shop_id'] = $shop_id;
-                    $inv_data['branch_id'] = $branch_id;
+                    //$inv_data['branch_id'] = $branch_id;
                     $inv_data['invoice_id'] = $invoice_id;
                     $inv_data['customer_id'] = $customer_id;
                     $inv_data['total_gross'] = $total_gross;
@@ -903,9 +946,9 @@ class OrderController extends Controller
                     $inv_data['delivery_crg'] = $delivery_charge;
                     $inv_data['invoice_total'] = $sum;
                     $inv_data['payment_by'] = $paid_by;
-                    $inv_data['wallet_status'] = $wallet_status;
+                    $inv_data['wallet_status'] = 'no';
                     $inv_data['wallet_point'] = $wallet_point;
-                    $inv_data['wallet_balance'] = $wallet_balance;
+                    $inv_data['wallet_balance'] = 0;
                     $inv_data['total_for_point'] = $total_for_point;
                     $inv_data['point_earn_rate'] = $point_earn_rate;
                     $inv_data['paid_amount'] = $paid;
@@ -966,6 +1009,7 @@ class OrderController extends Controller
                         
                         //$shop_settings = DB::table('shop_settings')->where('shop_code', $shop_id)->first(['sms_active_status', 'sms_limit', 'shop_name']);
                         
+                        /*
                         if($branch_info->sms_status == 'yes' && $request->send_sms == 1) {
                             $sms_settings = DB::table('s_m_s_settings')->first(['non_masking_price', 'masking_price']);
                             $sms_method = DB::table('sms')->where('shop_id', $shop_id)->first(['message']);
@@ -1002,6 +1046,10 @@ class OrderController extends Controller
                                 }
                             }
                         }
+                        */
+
+
+
                     }
 
 
@@ -1011,7 +1059,7 @@ class OrderController extends Controller
                     
                     $output = [
                         'status' => 'yes',
-                        'default_print' => $branch_info->print_by,
+                        'default_print' => 'no',
                         'invoice_num' => $invoice_id,
                         'due' => $current_due,
                         

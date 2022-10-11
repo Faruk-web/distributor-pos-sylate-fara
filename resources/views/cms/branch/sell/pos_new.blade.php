@@ -1234,7 +1234,7 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
         error("Please Select Customer!!!");
         return 0;
     }
-
+    variation_id = 0;
     var v_name, cartoon_text, cartoon_status = '';
     if(variation_id != 0) { v_name = '<span class="text-success">('+variation_name+')</span>' }
     var generate_id = pid+'_'+variation_id+'_'+sales_price+'_'+discount+'_'+discount_amount+'_'+vat_rate+'gi';
@@ -1914,7 +1914,7 @@ function order_confirm(e) {
             method: 'post',
             data: $('#order_confirm').serialize(),
             beforeSend: function() {
-                $('.se-pre-con').show();
+                //$('.se-pre-con').show();
             },
             success: function(response){
                 console.log(response);
