@@ -22,9 +22,9 @@ class CreateProductsTable extends Migration
             $table->integer('p_unit_type')->index();
             $table->double('G_current_stock')->default(0);
             $table->integer('is_cartoon')->default(0);
-            $table->double('cartoon_quantity')->default(0);
-            $table->double('cartoon_purchase_price')->default(0);
-            $table->double('cartoon_sales_price')->default(0);
+            $table->double('cartoon_quantity')->nullable()->default(0);
+            $table->double('cartoon_purchase_price')->nullable()->default(0);
+            $table->double('cartoon_sales_price')->nullable()->default(0);
             $table->string('image')->nullable();
             $table->double('purchase_price');
             $table->double('selling_price');

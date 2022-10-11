@@ -24,8 +24,8 @@ class CreateOrderReturnPorductsTable extends Migration
             $table->integer('variation_id')->index()->default(0);
             $table->double('quantity')->default(0);
             $table->integer('is_cartoon')->default(0);
-            $table->double('cartoon_quantity')->default(0);
-            $table->double('cartoon_amount')->default(0);
+            $table->double('cartoon_quantity')->nullable()->default(0);
+            $table->double('cartoon_amount')->nullable()->default(0);
             $table->double('price')->default(0);
             $table->string('discount')->default('no');
             $table->double('discount_amount')->default(0);

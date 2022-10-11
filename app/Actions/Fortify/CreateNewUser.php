@@ -40,7 +40,7 @@ class CreateNewUser implements CreatesNewUsers
         DB::table('shop_settings')->insert($data);
         DB::table('net_cash_bls')->insert(['shop_id' => $code, 'balance' => 0]);
         $customer_code = $code.'WALKING';
-        DB::table('customers')->insert(['shop_id' => $code, 'code' => $customer_code, 'name'=>'Walking Customer', 'phone'=>'p'.$code, 'email'=>'WC'.$code.'@gmail.com', 'address'=>'none', 'opening_bl'=>0, 'balance'=>0, 'active'=>1]);
+        //DB::table('customers')->insert(['shop_id' => $code, 'code' => $customer_code, 'name'=>'Walking Customer', 'phone'=>'p'.$code, 'email'=>'WC'.$code.'@gmail.com', 'address'=>'none', 'opening_bl'=>0, 'balance'=>0, 'active'=>1]);
 
         return User::create([
             'shop_id' => $code,

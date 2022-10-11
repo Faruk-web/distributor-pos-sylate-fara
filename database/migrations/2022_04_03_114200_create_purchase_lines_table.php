@@ -32,9 +32,9 @@ class CreatePurchaseLinesTable extends Migration
             $table->string('variation_id')->nullable();
             $table->string('imei_number')->nullable();
             $table->string('quantity')->default(0);
-            $table->integer('is_cartoon')->default(0);
-            $table->double('cartoon_quantity')->default(0);
-            $table->double('cartoon_amount')->default(0);
+            $table->integer('is_cartoon')->nullable()->default(0);
+            $table->double('cartoon_quantity')->nullable()->default(0);
+            $table->double('cartoon_amount')->nullable()->default(0);
             $table->longText('note')->nullable();
             $table->string('date')->nullable();
             $table->timestamps();

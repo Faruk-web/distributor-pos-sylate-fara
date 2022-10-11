@@ -21,9 +21,9 @@ class CreateOrderedProductsTable extends Migration
             $table->integer('product_id')->index();
             $table->integer('variation_id')->default(0)->index();
             $table->double('quantity');
-            $table->integer('is_cartoon')->default(0);
-            $table->double('cartoon_quantity')->default(0);
-            $table->double('cartoon_amount')->default(0);
+            $table->integer('is_cartoon')->nullable()->default(0);
+            $table->double('cartoon_quantity')->nullable()->default(0);
+            $table->double('cartoon_amount')->nullable()->default(0);
             $table->double('price');
             $table->string('discount')->default('no');
             $table->double('discount_amount')->default(0);

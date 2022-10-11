@@ -22,8 +22,8 @@ class CreateSupplierReturnProductsTable extends Migration
             $table->double('variation_id')->index();
             $table->double('quantity')->default(0);
             $table->integer('is_cartoon')->default(0);
-            $table->double('cartoon_quantity')->default(0);
-            $table->double('cartoon_amount')->default(0);
+            $table->double('cartoon_quantity')->nullable()->default(0);
+            $table->double('cartoon_amount')->nullable()->default(0);
             $table->double('price')->default(0);
             $table->double('total_price')->default(0);
             $table->timestamps();

@@ -859,7 +859,6 @@ class SupplierController extends Controller
     //End:: Suppliers stock in New
     
     
-    
     public function get_products_search_by_title_into_purchase_new(Request $request) {
         $title = $request->title;
         $shop_id = Auth::user()->shop_id;
@@ -1039,6 +1038,7 @@ class SupplierController extends Controller
                 $unit = $request->quantity[$key];
                 $purchasingP = $request->price[$key];
                 $sales_price = $request->sales_price[$key];
+                $is_cartoon = $request->is_cartoon[$key];
                 $cartoon_quantity = $request->cartoon_quantity[$key];
                 $cartoon_amount = $request->cartoon_amount[$key];
                 $variation_id = $request->variation_id[$key];
@@ -1068,6 +1068,7 @@ class SupplierController extends Controller
                 $purchase_line->lot_number = $lot_number;
                 $purchase_line->variation_id = $variation_id;
                 $purchase_line->quantity = $unit;
+                $purchase_line->is_cartoon = $is_cartoon;
                 $purchase_line->cartoon_quantity = $cartoon_quantity;
                 $purchase_line->cartoon_amount = $cartoon_amount;
                 
@@ -1077,7 +1078,7 @@ class SupplierController extends Controller
                 
                 $purchase_line_id = $purchase_line->id;
                 
-                DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$purchase_line_id, 'lot_number'=>$lot_number, 'branch_id'=>$destination_place, 'pid'=>$product_id, 'variation_id'=>$variation_id, 'purchase_price'=>$purchasingP, 'sales_price'=>$sales_price, 'discount'=>$discount, 'discount_amount'=>$discount_amount, 'vat'=>$vat, 'stock'=>$unit, 'cartoon_quantity'=>$cartoon_quantity, 'cartoon_amount'=>$cartoon_amount, 'created_at'=>$current_time]);
+                DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$purchase_line_id, 'lot_number'=>$lot_number, 'branch_id'=>$destination_place, 'pid'=>$product_id, 'variation_id'=>$variation_id, 'purchase_price'=>$purchasingP, 'sales_price'=>$sales_price, 'discount'=>$discount, 'discount_amount'=>$discount_amount, 'vat'=>$vat, 'stock'=>$unit,  'is_cartoon'=>$is_cartoon, 'cartoon_quantity'=>$cartoon_quantity, 'cartoon_amount'=>$cartoon_amount, 'created_at'=>$current_time]);
                 
                 $p_data = array();
                 $p_data['shop_id'] = $shop_id;
@@ -1089,6 +1090,7 @@ class SupplierController extends Controller
                 $p_data['variation_id'] = $variation_id;
                 $p_data['product_id'] = $product_id;
                 $p_data['quantity'] = $unit;
+                $p_data['is_cartoon'] = $is_cartoon;
                 $p_data['cartoon_quantity'] = $cartoon_quantity;
                 $p_data['cartoon_amount'] = $cartoon_amount;
                 $p_data['price'] = $purchasingP;
