@@ -1471,13 +1471,14 @@ class BranchSettingController extends Controller
         $shop_id = Auth::user()->shop_id;
         $order_method = $request->order_method;
         $sr_id = $request->sr_id;
+        $cartoon_status = 'no';
         
         $price = ENV('DEFAULT_CURRENCY');
         
         DB::statement("SET SQL_MODE=''");
         
         if($order_method == 'make_invoice') {
-            $products = DB::table('products')->where('shop_id', $shop_id)->select(['p_name', 'discount', 'discount_amount', 'image', 'selling_price as sales_price', 'is_variable as variation_id', 'id as pid', 'vat_rate', 'p_unit_type']);
+            $products = DB::table('products')->where('shop_id', $shop_id)->select(['p_name', 'discount', 'discount_amount', 'image', 'selling_price as sales_price', 'is_variable as variation_id', 'id as pid', 'vat_rate', 'p_unit_type', 'cartoon_quantity', 'is_cartoon as cartoon_amount']);
 
                         if(!empty($category_id)) {
                             $products = $products->where('p_cat', $category_id);
@@ -1503,7 +1504,7 @@ class BranchSettingController extends Controller
                             })
                         ->where(['s_r_stocks.sr_id'=>$sr_id, 'products.active'=>1])
                         ->where('s_r_stocks.stock', '>', 0)
-                        ->select('products.p_name', 's_r_stocks.discount', 's_r_stocks.discount_amount', 'products.image', 's_r_stocks.sales_price', 's_r_stocks.variation_id', 's_r_stocks.pid', 'products.vat_rate', 'products.p_unit_type', DB::raw('SUM(s_r_stocks.stock) as total_stock'))
+                        ->select('products.p_name', 's_r_stocks.discount', 's_r_stocks.discount_amount', 'products.image', 's_r_stocks.sales_price', 's_r_stocks.variation_id', 's_r_stocks.cartoon_quantity', 's_r_stocks.cartoon_amount', 's_r_stocks.pid', 'products.vat_rate', 'products.p_unit_type', DB::raw('SUM(s_r_stocks.stock) as total_stock'))
                         ->groupBy(['s_r_stocks.pid', 's_r_stocks.sales_price', 's_r_stocks.variation_id', 's_r_stocks.discount', 's_r_stocks.discount_amount']);
                         
                         if(!empty($category_id)) {
@@ -1528,12 +1529,18 @@ class BranchSettingController extends Controller
         if(count($products) > 0) {
             $status = 'yes';
             foreach ($products as $product) {
+                // if($order_method == 'make_invoice' && optional($product)->cartoon_amount == 1) { 
+                //      $cartoon_status = 'yes';
+                // }
+                // else if($order_method == 'make_invoice_with_product_delivery' && optional($product)->cartoon_quantity > 0){
+                //     $cartoon_status = 'yes';
+                // }
                 $unit_name = DB::table('unit_types')->where('id', $product->p_unit_type)->first(['unit_name']);
                 if($product->discount != 'no') { $discount_info = '<br>Discount: '.$product->discount.' ('.$product->discount_amount.')'; } else { $discount_info = ''; }
                 if(!empty(optional($product)->image)){ $img = asset(optional($product)->image); } else { $img = asset('images/product/noimage.png'); }
                 if(!is_null($product->variation_id) && !empty($product->variation_id) && $product->variation_id != 'simple') { $v_info = DB::table('variation_lists')->where('id', $product->variation_id)->first('list_title'); $variation_name = "<br><b>( ".optional($v_info)->list_title." )</b>"; $v_name = optional($v_info)->list_title; }
                 
-                $output.='<div onclick="add_to_cart(\''.optional($product)->pid.'\', \''.optional($product)->p_name.'\', \''.optional($product)->variation_id.'\', \''.$v_name.'\', \''.optional($product)->sales_price.'\', \''.optional($product)->discount.'\', \''.optional($product)->discount_amount.'\', \''.optional($product)->vat_rate.'\', \''.optional($product)->total_stock.'\', \''.optional($unit_name)->unit_name.'\')" title="'.optional($product)->p_name.'" class="col-md-4 col-6" id="product_item"><div class="productCard"><div class="productThumb"><img class="img-fluid rounded" src="'.$img.'"></div><div class="productContent"><span>'.substr(optional($product)->p_name, 0, 35).'...'.$variation_name.'<br \> <span class="p_n_qty">'.optional($product)->sales_price.' '.$price.' '.$discount_info.'</span></span></div></div></div>';
+                $output.='<div onclick="add_to_cart(\''.optional($product)->pid.'\', \''.optional($product)->p_name.'\', \''.optional($product)->variation_id.'\', \''.$v_name.'\', \''.optional($product)->sales_price.'\', \''.optional($product)->discount.'\', \''.optional($product)->discount_amount.'\', \''.optional($product)->vat_rate.'\', \''.optional($product)->total_stock.'\', \''.optional($unit_name)->unit_name.'\', \''.optional($product)->cartoon_quantity.'\', \''.optional($product)->cartoon_amount.'\')" title="'.optional($product)->p_name.'" class="col-md-4 col-6" id="product_item"><div class="productCard"><div class="productThumb"><img class="img-fluid rounded" src="'.$img.'"></div><div class="productContent"><span>'.substr(optional($product)->p_name, 0, 35).'...'.$variation_name.'<br \> <span class="p_n_qty">'.optional($product)->sales_price.' '.$price.' '.$discount_info.'</span></span></div></div></div>';
             }
         }
         else {

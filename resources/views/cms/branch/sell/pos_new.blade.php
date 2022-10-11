@@ -102,7 +102,7 @@
 			       
 				<div class="topbar justify-content-end">
 				 <div class="dropdown">
-				     <div id="id2" class="topbar-item">
+				     <div id="id2" class="topbar-item d-none">
 						 <div class="btn btn-icon w-auto h-auto btn-clean d-flex align-items-center py-0 mr-3">
 							 <span class="symbol symbol-35 symbol-light-success" onclick="clearAll()">
 								 <span class="symbol-label bg-dark text-light" title="Clear all">Clr</span>
@@ -347,16 +347,16 @@
 				    
 				     <div class="card bg-white border-0 table-contentpos">
 						<div class="card card-custom bg-white border-0 table-contentpos">
-                                <div class="form-group row d-none">
+                                <div class="row">
                                     <div class="col-md-10">
-                                        <div class="input-group">
+                                        <h3 class="fw-bold p-2 mb-0" id="what_option_output"></h3>
+                                        <div class="input-group d-none">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fas fa-barcode"></i></span>
                                         </div>
                                         <input type="text" class="form-control" placeholder="Barcode" autofocus="autofocus" id="product_barcode_search" name="">
                                     </div>
                                     </div>
-                                    
                                     <div class="col-md-2"><h3 class="fw-bold"><i class="fa fa-shopping-bag p-1" style="color: #F9A826;"> </i> <span id="total_cart_items">0</span></h3></div>
                                 </div>
 								<div class="table-datapos">
@@ -1023,6 +1023,7 @@
             $('#finale_step_row').show();
             //get_products();
             infinteLoadMore(1);
+            $('#what_option_output').text($("#order_method option:selected").text());
         }
         else {
             error("Please Select SR or Method");
@@ -1230,11 +1231,11 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
     
     var customer_code = $('#customer_code').val();
     if(customer_code == '') {
-        error("Please Select Customer!!!");
-        return 0;
+        //error("Please Select Customer!!!");
+        //return 0;
     }
 
-    var v_name = '';
+    var v_name, cartoon_text, cartoon_status = '';
     if(variation_id != 0) { v_name = '<span class="text-success">('+variation_name+')</span>' }
     var generate_id = pid+'_'+variation_id+'_'+sales_price+'_'+discount+'_'+discount_amount+'_'+vat_rate+'gi';
     generate_id = generate_id.replace(".", "_");
@@ -1249,8 +1250,9 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
             var up_qty = parseInt(cr_qty) + parseInt(1);
             $('#quantity_'+generate_id).val(up_qty);
             var play = document.getElementById('success1').play();
-            multiply();
-            calculateSum();
+            changeQuantity(generate_id, cartoon_quantity, cartoon_amount);
+            //multiply();
+            //calculateSum();
         }
         else if(order_method == 'make_invoice_with_product_delivery') {
             var cr_qty = $('#quantity_'+generate_id).val();
@@ -1258,8 +1260,9 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                 var up_qty = parseInt(cr_qty) + parseInt(1);
                 $('#quantity_'+generate_id).val(up_qty);
                 var play = document.getElementById('success1').play();
-                multiply();
-                calculateSum();
+                changeQuantity(generate_id, cartoon_quantity, cartoon_amount);
+                // multiply();
+                // calculateSum();
             } else { error("Reached Maximum Stock Qunatity!"); }
         }
     }
@@ -1267,8 +1270,18 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
         if($('#individual_vat_status').val() === 'no'){ vat_rate = 0; }
         if(discount === 'percent') { discount_percent = discount_amount; } else if(discount === 'flat') { flat_discount = discount_amount; }
         
-        if(cartoon_quantity > 0){ cartoon_text= "Max Cartoon Qty = "+cartoon_quantity; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
+        //if(cartoon_quantity > 0){ cartoon_text= "Max Cartoon Qty = "+cartoon_quantity; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
          
+        if(order_method == 'make_invoice' && cartoon_amount == 1){
+            cartoon_text= cartoon_quantity+" = 1 Cartoon";
+        }
+        else if(order_method == 'make_invoice_with_product_delivery' && cartoon_quantity > 0){
+            cartoon_text= "Max Cartoon Qty = "+cartoon_quantity;
+        }
+        else {
+            cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>";
+        }
+
         const cartDom = `<tr id="cart_tr_`+generate_id+`">
                             <td>
                             <input type="hidden" id="check_id_`+generate_id+`" value="`+generate_id+`">
@@ -1278,13 +1291,19 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                             <input type="hidden" name="previous_discount_amount[]" value="`+discount_amount+`">
                             
                             <input type="hidden" name="variation_id[]" value="`+variation_id+`">
-                            <h5 class="fw-bold">`+p_name+` `+v_name+`<i class="fa fa-plus plus_icon ml-2"  data-toggle="modal" data-target="#cart_modal_`+generate_id+`"></i></h5>
+                            <h5 class="fw-bold">`+p_name+`<i class="fa fa-plus plus_icon ml-2"  data-toggle="modal" data-target="#cart_modal_`+generate_id+`"></i></h5>
                             <span><b>Price: </b> <span id="pp_show_`+generate_id+`">`+sales_price+`</span> || <b>Discount: </b> <span id="dis_show_`+generate_id+`">`+discount+`(`+discount_amount+`)</span> || <b>Vat: </b> <span id="vat_show_`+generate_id+`">`+vat_rate+`</span></span>
                             
                             <div class="modal fade text-left show" id="cart_modal_`+generate_id+`" tabindex="-1" role="dialog" aria-labelledby="cart_modal_level_`+generate_id+`" aria-modal="true"><div class="modal-dialog modal-dialog-scrollable" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="cart_modal_level_`+generate_id+`">`+p_name+` `+v_name+`</h5></div><div class="modal-body"><div class="row"><div class="form-group col-md-12 col-sm-12"><label>Unit Price</label><input type="number" step=any name="price[]" id="price_`+generate_id+`" onchange="c_price('`+generate_id+`')" onkeyup="c_price('`+generate_id+`')" class="form-control pricesum" value="`+sales_price+`"></div><div class="form-group col-md-6 col-sm-6"><label>Percent Discount</label><input class="form-control discount_percent" onchange="ind_d_percent('`+generate_id+`')" onkeyup="ind_d_percent('`+generate_id+`')" type="number" step=any id="ind_p_d_amount_`+generate_id+`" name="disCP[]" value="`+discount_percent+`"></div><div class="form-group col-md-6 col-sm-6"><label>Flat Discount</label><input class="form-control flat_discount"  onchange="ind_d_flat('`+generate_id+`')" onkeyup="ind_d_flat('`+generate_id+`')" type="number" step=any id="ind_f_d_amount_`+generate_id+`" name="disC_flat[]" value="`+flat_discount+`"></div><div class="form-group col-md-12 col-sm-12"><label>VAT</label><input class="form-control individual_product_vat" name="individual_product_vat[]" type="number" readonly value="`+vat_rate+`"></div><div class="text-right col-md-12 col-sm-12"><button type="button" class="btn-secondary btn white pt-1 pb-1" data-dismiss="modal" aria-label="Close">Close</button></div></div></div></div></div></div>
                             </td>
                             <td>
-                                <input type="number" step="any" value="1" class="form-control border-dark w-100px quantity" id="quantity_`+generate_id+`" name="quantity[]" max="`+total_stock+`"> <span class="text-danger">Max: <span id="max_qty_`+generate_id+`">`+total_stock+`</span> `+unit_name+`</span>
+                                <input type="number" step="any" value="1" class="form-control border-dark w-100px quantity quantity`+generate_id+`" id="quantity_`+generate_id+`"  oninput="changeQuantity('`+generate_id+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')"  name="quantity[]" max="`+total_stock+`"> <span class="text-danger">
+                            </td>
+                            <td>
+                                <div class="mb-2 p-1 border rounded shadow">
+                                    <input style="width:90px;" type="number" class="cartoon_amount cartoon_amount`+generate_id+`" value="0" id="cartoon_amount" `+cartoon_status+` oninput="change_cartoon_amount('`+generate_id+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')" name="cartoon_amount[]" step="any" required>
+                                    <br><small>`+cartoon_text+`</small>
+                                </div>
                             </td>
                             <td>
                                 <h5 class="fw-bold item_subtotal" id="subtotal_item_`+generate_id+`">0</h5>
@@ -1293,7 +1312,6 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                             <td>
                                 <div class="text-center"><i class="fas fa-trash-alt text-danger" onclick="remove_cart_tr('`+generate_id+`')"></i></div>
                             </td>
-                            
                         </tr>`;
                         
         $('#cart_body').prepend(cartDom);
@@ -1306,6 +1324,49 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
     $('#multiple_product_modal_close').click();
     
 }
+
+
+function changeQuantity(generated_id, cartoon_quantity, cartoon_amount) {
+    quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, 'single_qty');
+    
+}
+
+function change_cartoon_amount(generated_id, cartoon_quantity, cartoon_amount) {
+    quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, 'cartoon_qty');
+}
+
+function quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, info) {
+    var order_method = $('#order_method').val();
+
+    if(order_method == 'make_invoice' && cartoon_amount == 1){
+        //cartoon_text= cartoon_quantity+" = 1 Cartoon";
+    }
+    else if(order_method == 'make_invoice_with_product_delivery' && cartoon_quantity > 0){
+        //cartoon_text= "Max Cartoon Qty = "+cartoon_quantity;
+    }
+    else {
+        cartoon_quantity = 0;
+    }
+
+    if(info == 'single_qty') {
+        if(cartoon_quantity > 0) {
+            var qty = $('.quantity'+generated_id).val();
+            var total_cartoon = qty / cartoon_quantity;
+            $('.cartoon_amount'+generated_id).val(total_cartoon.toFixed(2));
+        }
+    }
+    else if(info == 'cartoon_qty') {
+        if(cartoon_quantity > 0) {
+            var cartoon_qty = $('.cartoon_amount'+generated_id).val();
+            var total_qty = cartoon_quantity * cartoon_qty;
+            $('.quantity'+generated_id).val(total_qty.toFixed(2));
+        }
+    }
+
+    multiply();
+    calculateSum();
+}
+
 
 //product barcode to product
     $('#product_barcode_search').keypress(function(e) {
@@ -1365,10 +1426,10 @@ $( document ).ready(function() {
         calculateSum();
     }); 
     
-    $(document).on("click change paste keyup cut select", ".quantity", function() {
-        multiply();
-        calculateSum();
-    }); 
+    // $(document).on("click change paste keyup cut select", ".quantity", function() {
+    //     multiply();
+    //     calculateSum();
+    // }); 
     
     $(document).on("click change paste keyup cut select", "#discountAmount", function() {
         discount_output_td();

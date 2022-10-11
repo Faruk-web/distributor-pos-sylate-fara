@@ -24,6 +24,7 @@ class CreateBranchToSrTransferedProductsTable extends Migration
             $table->integer('pid')->index();
             $table->integer('variation_id')->default(0)->index();
             $table->double('quantity');
+            $table->integer('is_cartoon')->default(0);
             $table->double('cartoon_quantity')->default(0);
             $table->double('cartoon_amount')->default(0);
             $table->string('discount')->default('no');

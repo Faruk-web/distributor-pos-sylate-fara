@@ -27,6 +27,7 @@ class CreateProductStocksTable extends Migration
             $table->string('discount_amount')->default(0)->index();
             $table->string('vat')->default(0);
             $table->double('stock')->default(0)->index();
+            $table->integer('is_cartoon')->default(0);
             $table->double('cartoon_quantity')->default(0);
             $table->double('cartoon_amount')->default(0);
             $table->timestamps();

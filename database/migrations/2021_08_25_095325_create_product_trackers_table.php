@@ -25,6 +25,7 @@ class CreateProductTrackersTable extends Migration
             $table->integer('branch_id')->index()->nullable();
             $table->integer('product_id')->index();
             $table->double('quantity')->default(0);
+            $table->integer('is_cartoon')->default(0);
             $table->double('cartoon_quantity')->default(0);
             $table->double('cartoon_amount')->default(0);
             $table->double('price')->default(0);
