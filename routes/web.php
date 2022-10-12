@@ -841,6 +841,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/branch/returnable-invoice-ajax', [ReturnOrderController::class, 'ajax_search'])->name('branch.returnable.invoice.ajax');
         Route::get('/branch/{invoice_id}/return-products', [ReturnOrderController::class, 'edit'])->name('branch.return.invoice.product');
         Route::get('/branch/return-products/exchange-status', [ReturnOrderController::class, 'beanch_exchange_status']);
+        Route::get('/branch/return-products/search_customer', [ReturnOrderController::class, 'search_customer']);
+        Route::get('/branch/return_products/search_products', [ReturnOrderController::class, 'products_search_by_title_in_customer_return']);
+        Route::get('/distributor/return_products/confirm_return', [ReturnOrderController::class, 'confirm_direct_return_to_customer'])->name('customer.direct.return.products');
         
         Route::post('/branch/customer-return-products-confirm', [ReturnOrderController::class, 'update'])->name('customer.invoice.return.confirm');
         Route::get('/branch/customer-returned-invoices', [ReturnOrderController::class, 'returned_product_invoices'])->name('branch.customer.returned.invoices');

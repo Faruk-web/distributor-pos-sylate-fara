@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use App\Models\Purchase_lines;
+use App\Models\Area;
+use App\Models\SRStocks;
+use App\Models\Customer;
 use PDF;
 
 
@@ -27,7 +30,11 @@ class ReturnOrderController extends Controller
     {
         if(User::checkMultiplePermission(['branch.return.product', 'others.returns.refund']) == true){
             $wing = 'main';
-            return view('cms.branch.sell.all_invoice_for_return', compact('wing'));
+
+            $all_area = Area::where(['shop_id'=>Auth::user()->shop_id])->get();
+            $all_sr = User::Where(['active'=> 1, 'type'=>'SR'])->orderBy('name', 'ASC')->get();
+            return view('cms.branch.sell.return_customer_product', compact('wing', 'all_sr', 'all_area'));
+            //return view('cms.branch.sell.all_invoice_for_return', compact('wing'));
         }
         else {
             return Redirect()->back()->with('error', 'Sorry you can not access this page');
@@ -62,6 +69,98 @@ class ReturnOrderController extends Controller
                 ->rawColumns(['action', 'customer_name'])
                 ->make(true);
         }
+    }
+
+    //Begin:: search customer for sell
+    public function search_customer(Request $request) {
+        $output = '';
+        $shop_id = Auth::user()->shop_id;
+        $customer_info = $request->get('customer_info');
+        $area = $request->get('search_custoemr_area');
+        
+          $customers = Customer::where('shop_id', '=', $shop_id)
+                ->where('active', 1)
+                ->where(function ($query) use ($customer_info) {
+                    $query->where('phone', 'LIKE', '%'. $customer_info. '%')
+                        ->orWhere('code', 'LIKE', '%'. $customer_info. '%')
+                        ->orWhere('name', 'LIKE', '%'. $customer_info. '%');
+                });
+                
+                if($area != 'all') {
+                  $customers = $customers->where('area_id', $area);
+                }
+                $customers = $customers->limit(5);
+                $customers = $customers->get(['name', 'phone', 'code', 'area_id', 'id']);
+                
+          if(!empty($customer_info)) {
+              if(count($customers) > 0) {
+                foreach ($customers as $customer) {
+                    $output.='<tr>'.
+                        '<td>'.$customer->name.'</td>'.
+                        '<td>'.$customer->phone.'</td>'.
+                        '<td>'.optional($customer->area_info)->name.'</td>'.
+                        '<td><button type="button" onclick="select_customer(\''.optional($customer)->id.'\', \''.optional($customer)->name.'\', \''.optional($customer)->phone.'\', \''.optional($customer->area_info)->name.'\')" class="btn bg-success rounded-pill p-2 text-light">Select</button></td>'.
+                        '</tr>';
+                    }
+              }
+              else {
+                $output.='<tr><td colspan="6" class="text-center"><h4 class="fw-bold text-danger">No Customer Found!!!</h4></td></tr>';
+            }
+            
+        }
+
+        return Response($output);
+    }
+
+    public function products_search_by_title_in_customer_return(Request $request) {
+        $title = $request->title;
+        $customer_id = $request->customer_id;
+        $shop_id = Auth::user()->shop_id;
+        $output = '';
+
+        $products = DB::table('products')
+                    ->distinct()
+                    ->leftJoin('product_trackers', function($join)
+                        {
+                            $join->on('products.id', '=', 'product_trackers.product_id');
+                        })
+                    ->where(['product_trackers.supplier_id'=>$customer_id, 'product_trackers.shop_id'=>$shop_id, 'product_trackers.product_form'=>'S'])
+                    ->select('products.p_name', 'products.p_brand', 'product_trackers.*', 'products.p_unit_type');
+                    $products = $products->where('products.p_name', "like", "%".$title."%");
+                    $products = $products->orderBy('id', 'DESC');
+                    $products = $products->paginate(50);
+        
+        if( $title != '') {
+            if($products->isNotEmpty()) {
+                foreach($products as $product) {
+                    $brand_info = DB::table('brands')->where('id', $product->p_brand)->first(['brand_name']);
+                    $cartoon_info = '';
+                    $variation_name = '';
+                    $variation_title = '';
+                    if($product->cartoon_amount > 0) {
+                        $cartoon_info = $product->cartoon_amount." Cartoon";
+                    }
+                    if($product->variation_id != 0 && $product->variation_id != '') {
+                        $variation_info = DB::table('product_variations')->where(['id'=>$product->variation_id])->first();
+                        $variation_name =  '<span class="text-primary">('.optional($variation_info)->title.')</span>';
+                        $variation_title = optional($variation_info)->title;
+                    }
+                    $unit_type_info = DB::table('unit_types')->where('id', $product->p_unit_type)->first(['unit_name']);
+                    $output .= '<li class="nav-item mb-1 p-1 rounded" id="product_text" onclick="myFunction(\''.$product->id.'\', \''.$product->product_id.'\', \''.$product->variation_id.'\', \''.$variation_title.'\', \''.$product->purchase_line_id.'\', \''.$product->lot_number.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->sales_price.'\', \''.$product->vat.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$product->quantity.'\', \''.optional($unit_type_info)->unit_name.'\', \''.optional($product)->is_cartoon.'\', \''.optional($product)->cartoon_quantity.'\', \''.optional($product)->cartoon_amount.'\', \''.str_replace("_","/", $product->invoice_id).'\')" title="Add me">
+                        <h6 class="text-success">'.$product->p_name.' '.$variation_name.'</h6>
+                        <span><b>Brand:</b> '.optional($brand_info)->brand_name.', <b>Lot Number:</b> '.$product->lot_number.', <b>Sales Price:</b> '.$product->sales_price.', <b>Discount:</b> '.$product->discount.'('.$product->discount_amount.'), <b>VAT:</b> '.$product->vat.'%</span>
+                        <br><span class="text-danger"><b>Sold Unit:</b> '.$product->quantity.' '.optional($unit_type_info)->unit_name.', '.$cartoon_info.'</span>
+                        <br><span class="text-primary"><b>Invoice # </b>'.str_replace("_","/", $product->invoice_id).'</span>
+                        
+                    </li>';
+                }
+            }
+            else {
+                $output .= '<li class="nav-item mb-1 p-3 rounded text-center"><p class="text-danger">No Product Found!</p></li>';
+            }
+        }
+        return response()->json($output);
+
     }
 
     public function returned_product_invoices()
@@ -232,6 +331,7 @@ class ReturnOrderController extends Controller
         if(empty($branch_id)) {
             $branch_id = Auth::user()->shop_info->default_branch_id_for_sell;
         }
+
         $stock_info = DB::table('product_stocks')->where(['branch_id'=>$branch_id, 'pid'=>$pid, 'variation_id'=>$variation_id])->sum('stock');
         if($stock_info > 0) {
             $output = [
@@ -607,7 +707,6 @@ class ReturnOrderController extends Controller
                             DB::table('order_return_porducts')->insert(['invoice_id'=>$invoice_id, 'return_or_exchange'=>'e', 'how_many_times_edited'=>$update_count, 'product_id'=>$product_id, 'variation_id'=>$ordered_product_info->variation_id, 'quantity'=>$unit, 'price'=>$price, 'discount'=>$ordered_product_info->discount, 'discount_amount'=>$ordered_product_info->discount_amount, 'vat'=>$ordered_product_info->vat_amount, 'total_price'=>0, 'created_at'=>$current_time]);
                         }
                     }
-                    
                 }
                 
                 
@@ -695,6 +794,101 @@ class ReturnOrderController extends Controller
             return Redirect()->back()->with('error', 'Sorry you can not access this page');
         }
     }
+
+
+    public function confirm_direct_return_to_customer(Request $request) {
+        if(User::checkMultiplePermission(['branch.return.product', 'others.returns.refund']) == true){
+            if($request->pid != '') {
+                $shop_id = Auth::user()->shop_id;
+                $pid = $request->pid;
+                $return_or_exchange = $request->return_or_exchange;
+                $sr_id = $request->sr;
+                $total_gross = 0;
+                $date = $request->date;
+                $customer_id = $request->customer_id;
+                $customer_info = DB::table('customers')->where('id', $customer_id)->where('shop_id', $shop_id)->first(['balance', 'code', 'id', 'wallet_balance', 'wallets']);
+
+                foreach($pid as $key => $item) {
+                   
+                    $return_or_exchange = $request->return_or_exchange[$key];
+                    $row_id = $request->row_id[$key];
+                    $product_id = $pid[$key];
+                    $unit = $request->quantity[$key];
+                    $cartoon_amount = $request->cartoon_amount[$key];
+                    
+                    $trackers_info = DB::table('product_trackers')->where(['id'=>$row_id, 'shop_id'=> $shop_id])->first();
+                    
+                    if($return_or_exchange == 'r') {
+                        
+                        $check_sr_stocks = SRStocks::where(['shop_id'=>$shop_id, 'purchase_line_id'=>$trackers_info->purchase_line_id, 'lot_number'=>$trackers_info->lot_number, 'sr_id'=>$sr_id, 'pid'=>$product_id, 'variation_id'=>$trackers_info->variation_id, 'is_cartoon'=>$trackers_info->is_cartoon, 'cartoon_quantity'=>$trackers_info->cartoon_quantity])->first();
+                                                
+                        if(!is_null($check_sr_stocks)) {
+                            $current_stock_item = optional($check_sr_stocks)->stock;
+                            $update_stock_item = $current_stock_item + $unit;
+
+                            $update_sr_stock = $check_sr_stocks;
+                            $update_sr_stock->stock = $update_stock_item;
+
+                            if($trackers_info->is_cartoon == 1) {
+                                $update_sr_stock->cartoon_amount = optional($check_sr_stocks)->cartoon_amount + $cartoon_amount;
+                            }
+
+                            $update_sr_stock->update();
+
+                        }
+                        else {
+                            $insert = DB::table('s_r_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$trackers_info->purchase_line_id, 'lot_number'=>$trackers_info->lot_number, 'sr_id'=>$sr_id, 'pid'=>$pid,  'variation_id'=>$trackers_info->variation_id, 'purchase_price'=>$trackers_info->purchase_price, 'sales_price'=>$trackers_info->sales_price, 'discount'=>$trackers_info->discount, 'discount_amount'=>$trackers_info->discount_amount, 'vat'=>$trackers_info->vat, 'stock'=>$unit, 'is_cartoon'=>$trackers_info->is_cartoon, 'cartoon_quantity'=>$trackers_info->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount]);
+                        }
+
+                        $total_price = $unit * $trackers_info->price;
+                        $total_gross = $total_gross + $total_price;
+
+                        $p_data = array();
+                        $p_data['shop_id'] = $shop_id;
+                        $p_data['lot_number'] = $trackers_info->lot_number;
+                        $p_data['purchase_line_id'] = $trackers_info->purchase_line_id;
+                        $p_data['purchase_price'] = $trackers_info->purchase_price;
+                        $p_data['total_purchase_price'] = $trackers_info->purchase_price * $unit;
+                        $p_data['sales_price'] = $trackers_info->sales_price;
+                        $p_data['variation_id'] = $trackers_info->variation_id;
+                        $p_data['product_id'] = $product_id;
+                        $p_data['quantity'] = $unit;
+                        $p_data['price'] = $trackers_info->purchase_price;
+                        $p_data['discount'] = $trackers_info->discount;
+                        $p_data['discount_amount'] = $trackers_info->discount_amount;
+                        $p_data['vat'] = $trackers_info->vat;
+                        $p_data['total_price'] = $total_price;
+                        $p_data['status'] = 1; // 1 means in
+                        $p_data['product_form'] = 'R';
+                        $p_data['branch_id'] = $sr_id;
+                        $p_data['invoice_id'] = $trackers_info->invoice_id;
+                        $p_data['note'] = "Return To Customers";
+                        $p_data['created_at'] = $date;
+                        $insert_product_trackers = DB::table('product_trackers')->insert($p_data);
+
+                        DB::table('order_return_porducts')->insert(['invoice_id'=>$trackers_info->invoice_id, 'return_or_exchange'=>'r', 'how_many_times_edited'=>0, 'product_id'=>$product_id, 'variation_id'=>$trackers_info->variation_id, 'quantity'=>$unit, 'price'=>$trackers_info->price, 'discount'=>$trackers_info->discount, 'discount_amount'=>$trackers_info->discount_amount, 'vat'=>$trackers_info->vat_amount, 'total_price'=>$total_price, 'created_at'=>$date]);
+                            
+                    }
+                    else if($return_or_exchange == 'e') {
+                        DB::table('order_return_porducts')->insert(['invoice_id'=>$invoice_id, 'return_or_exchange'=>'e', 'how_many_times_edited'=>$update_count, 'product_id'=>$product_id, 'variation_id'=>$ordered_product_info->variation_id, 'quantity'=>$unit, 'price'=>$price, 'discount'=>$ordered_product_info->discount, 'discount_amount'=>$ordered_product_info->discount_amount, 'vat'=>$ordered_product_info->vat_amount, 'total_price'=>0, 'created_at'=>$current_time]);
+                    }
+                }
+
+                $return_customer = DB::table('return_orders')->insert(['shop_id'=>$shop_id, 'branch_id'=>$branch_id, 'invoice_id'=>$invoice_id, 'return_current_times'=>$update_count, 'customer_id'=>$customer_id, 'total_gross'=>$total_gross, 'vat_status'=>$request->vat, 'discount_status'=>$global_discount, 'discount_rate'=>$global_discount_rate,  'others_crg'=>$request->only_others_crg_tk,  'fine'=>$request->extra_fine_tk,  'refundAbleAmount'=>$request->total_payable,  'currentDue'=>$current_due,  'paid'=>0, 'date'=>$date, 'created_at'=>$date]);
+
+
+            }
+            else {
+                return Redirect()->back()->with('error', 'Sorry has no product to return.');
+            }
+
+        }
+        else {
+            return Redirect()->back()->with('error', 'Sorry you can not access this page');
+        }
+    }
+
+
 
     /**
      * Remove the specified resource from storage.
