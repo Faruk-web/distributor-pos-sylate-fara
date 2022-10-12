@@ -33,6 +33,8 @@ class CreateShopSettingsTable extends Migration
             $table->double('minimum_sell_to_get_monthley_commission')->nullable();
             $table->double('commission_percent_monthley')->nullable();
             $table->double('commission_percent_daily')->nullable();
+            $table->longText('attendence_api_auth_user')->nullable();
+            $table->longText('attendence_api_auth_code')->nullable();
             $table->string('is_active')->default(1);
             $table->timestamps();
         });
