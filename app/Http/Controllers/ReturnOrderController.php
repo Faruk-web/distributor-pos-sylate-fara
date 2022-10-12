@@ -201,15 +201,18 @@ class ReturnOrderController extends Controller
             $wing = 'main';
             $invoice = Order::where('invoice_id', $invoice_id)->where('shop_id', $shop_id)->first();
             if($invoice) {
+                /*
                 $branch_id = Auth::user()->branch_id;
                 if(empty($branch_id)) {
                     $branch_id = Auth::user()->shop_info->default_branch_id_for_sell;
+
                     if(empty($branch_id)) {
                         return Redirect()->back()->with('error', 'Set Default Branch from Shop Settings.');
                     }
                 }
+                */
                 $how_many_time_returns = DB::table('return_orders')->where('invoice_id', $invoice_id)->count('id');
-                return view('cms.branch.sell.return_invoice_product_new', compact('invoice', 'how_many_time_returns', 'wing', 'branch_id'));
+                return view('cms.branch.sell.return_invoice_product_new', compact('invoice', 'how_many_time_returns', 'wing'));
             }
             else {
                 return Redirect()->back()->with('error', 'Sorry you can not access this page');

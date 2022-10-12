@@ -16,6 +16,7 @@ use Mail;
 use App\Mail\OrderMail;
 use App\Models\Product_stock;
 use App\Models\Product;
+use App\Models\SRStocks;
 
 
 
@@ -605,7 +606,7 @@ class OrderController extends Controller
                     
                     $customer_code = $request->customer_code;
                     
-                    $customer_info = DB::table('customers')->where(['code'=>$customer_code, 'shop_id'=>$shop_id])->first(['code', 'name', 'phone', 'email', 'balance', 'id', 'wallet_balance', 'wallets']);
+                    $customer_info = DB::table('customers')->where(['code'=>$customer_code, 'shop_id'=>$shop_id])->first(['code', 'name', 'phone', 'email', 'balance', 'id', 'wallet_balance', 'wallets', 'area_id']);
                     $customer_id = $customer_info->id;
                     $area_id = optional($customer_info)->area_id;
                     
@@ -692,16 +693,22 @@ class OrderController extends Controller
                             $old_price = $request->previous_price[$key];
                             $previous_discount = $request->previous_discount[$key];
                             $previous_discount_amount = $request->previous_discount_amount[$key];
+                            $old_is_cartoon = $request->is_cartoon[$key];
+                            $old_cartoon_quantity = $request->cartoon_quantity[$key];
                             
-                            $product_check = Product_stock::Where(['pid'=>$pid[$key], 'branch_id'=>$branch_id, 'sales_price'=>$old_price, 'variation_id'=>$variation_id, 'discount'=>$previous_discount, 'discount_amount'=>$previous_discount_amount])->where('stock', '>', 0)->orderBy('lot_number', 'ASC')->get();
+                            $product_check = SRStocks::Where(['pid'=>$pid[$key], 'sr_id'=>$sr_id, 'sales_price'=>$old_price, 'variation_id'=>$variation_id, 'discount'=>$previous_discount, 'discount_amount'=>$previous_discount_amount, 'is_cartoon'=>$old_is_cartoon, 'cartoon_quantity'=>$old_cartoon_quantity])->where('stock', '>', 0)->orderBy('lot_number', 'ASC')->get();
                             
                             // Individual Product with lot Wise Start
                             if(count($product_check) > 0) {
                                $sold_unit = $unit;
                                $total_count = 0;
+                               $total_cartoon_count = 0;
                                foreach($product_check as $product_item) {
-                                   $db_minus_unit = 0;
-                                   $db_stock = $product_item->stock;
+                                    $db_minus_unit = 0;
+                                    $db_minus_unit_in_cartoon = 0;
+                                    
+                                    $db_stock = $product_item->stock;
+                                    $db_stock_in_cartoon = $product_item->cartoon_amount;
                                    
                                    if($sold_unit != 0) {
                                        
@@ -735,10 +742,18 @@ class OrderController extends Controller
                                        $vat_price = $total_price * $vat / 100;
                                        
                                        $total_price = $total_price + $vat_price;
-                                       
-                                       DB::table('product_trackers')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_item->purchase_line_id, 'lot_number'=>$product_item->lot_number, 'purchase_price'=>$product_item->purchase_price, 'total_purchase_price'=>optional($product_item)->purchase_price*$db_minus_unit, 'sales_price'=>$price, 'variation_id'=>$product_item->variation_id, 'branch_id'=>$branch_id, 'product_id'=>$product_item->pid, 'quantity'=>$db_minus_unit, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat'=>$product_item->vat, 'total_price'=>$total_price, 'status'=>0, 'product_form'=>'S', 'invoice_id'=>$invoice_id, 'created_at'=>$date]);
-                                       
+
                                        $update_product_item = $product_item;
+
+                                       if($old_is_cartoon == 1) {
+                                            $db_minus_unit_in_cartoon = $db_minus_unit / $old_cartoon_quantity;
+                                            $update_product_item->cartoon_amount = $db_stock_in_cartoon - $db_minus_unit_in_cartoon;
+                                       }
+
+                                       $total_cartoon_count = $total_cartoon_count + $db_minus_unit_in_cartoon;
+
+                                       DB::table('product_trackers')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_item->purchase_line_id, 'lot_number'=>$product_item->lot_number, 'purchase_price'=>$product_item->purchase_price, 'total_purchase_price'=>optional($product_item)->purchase_price*$db_minus_unit, 'sales_price'=>$price, 'variation_id'=>$product_item->variation_id, 'branch_id'=>$sr_id, 'product_id'=>$product_item->pid, 'quantity'=>$db_minus_unit, 'is_cartoon'=>$product_item->is_cartoon, 'cartoon_quantity'=>$product_item->cartoon_quantity, 'cartoon_amount'=>$db_minus_unit_in_cartoon, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat'=>$product_item->vat, 'total_price'=>$total_price, 'status'=>0, 'product_form'=>'S', 'invoice_id'=>$invoice_id, 'created_at'=>$date]);
+                                       
                                        $update_product_item->stock = $db_stock - $db_minus_unit;
                                        $update_product_item->update();
                                        
@@ -768,15 +783,15 @@ class OrderController extends Controller
                               $total_price = $total_price + $vat_price_ip;
                               
                               $total_gross = $total_gross + $total_price;
-                              
-                              DB::table('ordered_products')->insert(['invoice_id'=>$invoice_id, 'product_id'=>$pid[$key], 'variation_id'=>$variation_id, 'quantity'=>$unit, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat_amount'=>$vat, 'total_price'=>$total_price, 'created_at'=>$date]);
+                              //echo $total_gross."<br>";
+                              DB::table('ordered_products')->insert(['invoice_id'=>$invoice_id, 'product_id'=>$pid[$key], 'variation_id'=>$variation_id, 'quantity'=>$unit, 'delivered_quantity'=>$unit, 'is_cartoon'=>$old_is_cartoon, 'cartoon_quantity'=>$old_cartoon_quantity, 'cartoon_amount'=>$total_cartoon_count, 'price'=>$price, 'discount'=>$individual_discount_status, 'discount_amount'=>$individual_discount_amount, 'discount_in_tk'=>$discount_in_tk, 'vat_amount'=>$vat, 'total_price'=>$total_price, 'created_at'=>$date]);
                               // Individual Product
                             }
                         }
                         
                     }
                     
-                    
+                    //return 0;
                     if($customer_info->code == $shop_id.'WALKING') { $previous_due = 0; } else { $previous_due = $customer_balance; }
                     
                     $sum = $total_gross;
@@ -821,6 +836,7 @@ class OrderController extends Controller
                     
                     //Get Wallet Point
                     if($sum >= $shop_settings->minimum_purchase_to_get_point && $shop_settings->is_active_customer_points == 'yes' && $customer_info->code != $shop_id.'WALKING') {
+                        /*
                         $point_earn_rate = $shop_settings->point_earn_rate + 0;
                         $wallet_point = $sum / $point_earn_rate;
                         $total_for_point = $sum;
@@ -828,6 +844,7 @@ class OrderController extends Controller
                         $previous_point = $customer_info->wallets+0;
                         $update_wallets_point = $wallet_point + $previous_point;
                         DB::table('customers')->where('id', $customer_info->id)->update(['wallets'=>$update_wallets_point]);
+                        */
                     }
                     else {
                         $wallet_point = 0;
@@ -844,7 +861,6 @@ class OrderController extends Controller
                     }
                     
                     $sum = $sum + $delivery_charge + $previous_due;
-                    
                     
                     //Wallet Charge
                     /*
@@ -880,11 +896,6 @@ class OrderController extends Controller
                     else if($submit_form == 'partial_payment') {
                         $paid = $request->partial_paid;
                         // $current_due = $request->partial_due;
-                        $paid_by = 'cash';
-                    }
-                    else if($submit_form == 'cash_on_payment') {
-                        $paid = $request->cash_on_delivery_paid;
-                        // $current_due = $request->cash_on_delivery_due;
                         $paid_by = 'cash';
                     }
                     else if($submit_form == 'cheque_payment') {
@@ -932,6 +943,9 @@ class OrderController extends Controller
                     $inv_data['shop_id'] = $shop_id;
                     //$inv_data['branch_id'] = $branch_id;
                     $inv_data['invoice_id'] = $invoice_id;
+                    $inv_data['area_id'] = $area_id;
+                    $inv_data['sr_id'] = $sr_id;
+                    
                     $inv_data['customer_id'] = $customer_id;
                     $inv_data['total_gross'] = $total_gross;
                     $inv_data['vat'] = $vat;

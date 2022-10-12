@@ -217,13 +217,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-2 p-1">
+                            <div class="col-md-2 p-1 d-none">
                                 <div class="form-group shadow p-2">
                                     <label class="text-dark d-flex"><span class="text-danger">*</span>Method</label>
                                     <select name="order_method" class="form-control" id="order_method">
-                                        <option value="0">-- Select Method --</option>
-                                        <option value="make_invoice">Make Invoice</option>
-                                        <option value="make_invoice_with_product_delivery">Make Invoice With Product Delivery</option>
+                                        <option class="d-none" value="0">-- Select Method --</option>
+                                        <option class="d-none" value="make_invoice">Make Invoice</option>
+                                        <option selected value="make_invoice_with_product_delivery">Make Invoice With Product Delivery</option>
                                     </select>
                                     <div class="">
                                         <table class="table table-bootstrap">
@@ -1286,6 +1286,8 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                             <td>
                             <input type="hidden" id="check_id_`+generate_id+`" value="`+generate_id+`">
                             <input type="hidden" name="pid[]" value="`+pid+`">
+                            <input type="hidden" name="is_cartoon[]" value="`+is_cartoon+`">
+                            <input type="hidden" name="cartoon_quantity[]" value="`+cartoon_quantity+`">
                             <input type="hidden" name="previous_price[]" value="`+sales_price+`">
                             <input type="hidden" name="previous_discount[]" value="`+discount+`">
                             <input type="hidden" name="previous_discount_amount[]" value="`+discount_amount+`">
@@ -1294,10 +1296,10 @@ function add_to_cart(pid, p_name, variation_id, variation_name, sales_price, dis
                             <h5 class="fw-bold">`+p_name+`<i class="fa fa-plus plus_icon ml-2"  data-toggle="modal" data-target="#cart_modal_`+generate_id+`"></i></h5>
                             <span><b>Price: </b> <span id="pp_show_`+generate_id+`">`+sales_price+`</span> || <b>Discount: </b> <span id="dis_show_`+generate_id+`">`+discount+`(`+discount_amount+`)</span> || <b>Vat: </b> <span id="vat_show_`+generate_id+`">`+vat_rate+`</span></span>
                             
-                            <div class="modal fade text-left show" id="cart_modal_`+generate_id+`" tabindex="-1" role="dialog" aria-labelledby="cart_modal_level_`+generate_id+`" aria-modal="true"><div class="modal-dialog modal-dialog-scrollable" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="cart_modal_level_`+generate_id+`">`+p_name+` `+v_name+`</h5></div><div class="modal-body"><div class="row"><div class="form-group col-md-12 col-sm-12"><label>Unit Price</label><input type="number" step=any name="price[]" id="price_`+generate_id+`" onchange="c_price('`+generate_id+`')" onkeyup="c_price('`+generate_id+`')" class="form-control pricesum" value="`+sales_price+`"></div><div class="form-group col-md-6 col-sm-6"><label>Percent Discount</label><input class="form-control discount_percent" onchange="ind_d_percent('`+generate_id+`')" onkeyup="ind_d_percent('`+generate_id+`')" type="number" step=any id="ind_p_d_amount_`+generate_id+`" name="disCP[]" value="`+discount_percent+`"></div><div class="form-group col-md-6 col-sm-6"><label>Flat Discount</label><input class="form-control flat_discount"  onchange="ind_d_flat('`+generate_id+`')" onkeyup="ind_d_flat('`+generate_id+`')" type="number" step=any id="ind_f_d_amount_`+generate_id+`" name="disC_flat[]" value="`+flat_discount+`"></div><div class="form-group col-md-12 col-sm-12"><label>VAT</label><input class="form-control individual_product_vat" name="individual_product_vat[]" type="number" readonly value="`+vat_rate+`"></div><div class="text-right col-md-12 col-sm-12"><button type="button" class="btn-secondary btn white pt-1 pb-1" data-dismiss="modal" aria-label="Close">Close</button></div></div></div></div></div></div>
+                            <div class="modal fade text-left show" id="cart_modal_`+generate_id+`" tabindex="-1" role="dialog" aria-labelledby="cart_modal_level_`+generate_id+`" aria-modal="true"><div class="modal-dialog modal-dialog-scrollable" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="cart_modal_level_`+generate_id+`">`+p_name+`</h5></div><div class="modal-body"><div class="row"><div class="form-group col-md-12 col-sm-12"><label>Unit Price</label><input type="number" step=any name="price[]" id="price_`+generate_id+`" onchange="c_price('`+generate_id+`')" onkeyup="c_price('`+generate_id+`')" class="form-control pricesum" value="`+sales_price+`"></div><div class="form-group col-md-6 col-sm-6"><label>Percent Discount</label><input class="form-control discount_percent" onchange="ind_d_percent('`+generate_id+`')" onkeyup="ind_d_percent('`+generate_id+`')" type="number" step=any id="ind_p_d_amount_`+generate_id+`" name="disCP[]" value="`+discount_percent+`"></div><div class="form-group col-md-6 col-sm-6"><label>Flat Discount</label><input class="form-control flat_discount"  onchange="ind_d_flat('`+generate_id+`')" onkeyup="ind_d_flat('`+generate_id+`')" type="number" step=any id="ind_f_d_amount_`+generate_id+`" name="disC_flat[]" value="`+flat_discount+`"></div><div class="form-group col-md-12 col-sm-12"><label>VAT</label><input class="form-control individual_product_vat" name="individual_product_vat[]" type="number" readonly value="`+vat_rate+`"></div><div class="text-right col-md-12 col-sm-12"><button type="button" class="btn-secondary btn white pt-1 pb-1" data-dismiss="modal" aria-label="Close">Close</button></div></div></div></div></div></div>
                             </td>
                             <td>
-                                <input type="number" step="any" value="1" class="form-control border-dark w-100px quantity quantity`+generate_id+`" id="quantity_`+generate_id+`"  oninput="changeQuantity('`+generate_id+`', '`+is_cartoon+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')"  name="quantity[]" max="`+total_stock+`"> <span class="text-danger">
+                                <input type="number" step="any" value="1" class="form-control border-dark w-100px quantity quantity`+generate_id+`" id="quantity_`+generate_id+`"  oninput="changeQuantity('`+generate_id+`', '`+is_cartoon+`', '`+cartoon_quantity+`', '`+cartoon_amount+`')"  name="quantity[]" max="`+total_stock+`"><small class="text-danger">Max  `+total_stock+` `+unit_name+`</small>
                             </td>
                             <td>
                                 <div class="mb-2 p-1 border rounded shadow">
@@ -1914,10 +1916,10 @@ function order_confirm(e) {
             method: 'post',
             data: $('#order_confirm').serialize(),
             beforeSend: function() {
-                //$('.se-pre-con').show();
+                $('.se-pre-con').show();
             },
             success: function(response){
-                console.log(response);
+                //console.log(response);
                 if(response['status'] == 'yes') {
                     clearAll();
                     if(response['default_print'] == 'pos') {
@@ -1943,9 +1945,16 @@ function order_confirm(e) {
                     }
                     
                     var play = document.getElementById('success').play();
-                    $('.se-pre-con').hide();
+                    swal({
+                        title: "Success",
+                        text: 'Order Complete Successfully!',
+                        icon: "success",
+                        button: "Ok",
+                    });
+
+                    location.replace("{{ route('branch.sell.new') }}");
+                    //$('.se-pre-con').hide();
                     
-                    //location.replace("{{ route('shop.walking.customer') }}");
                 }
                 else {
                     swal({

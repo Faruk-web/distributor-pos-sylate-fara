@@ -15,6 +15,12 @@ class Order extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
+    //customer info
+    public function sr_info() {
+        return $this->belongsTo(User::class, 'sr_id');
+    }
+
+
     //invoice products
     public function invoice_products() {
         return $this->hasMany(Ordered_product::class, 'invoice_id', 'invoice_id');

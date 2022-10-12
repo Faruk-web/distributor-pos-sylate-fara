@@ -2,8 +2,6 @@
 @section('body_content')
 @php( $total_gross = 0 )
 @php( $customer_info = $invoice->customer_info)
-@php( $branch_info = DB::table('branch_settings')->where('id', $branch_id)->first())
-@php( $sold_branch_info = DB::table('branch_settings')->where(['id'=>$invoice->branch_id])->first(['branch_name', 'branch_address']) )
 <style>
     tr td{
         padding: 10px;
@@ -34,7 +32,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-10">
-                    <h4 class="p-2 bg-dark rounded shadow text-light"><b>You are Returning From =><span class="text-danger">{{$branch_info->branch_name}}</span></b><br><b>Sold From =><span class="text-success">{{$sold_branch_info->branch_name}}, {{$sold_branch_info->branch_address}}</span></b></h4>
+                    <h4 class="p-2 bg-dark rounded shadow text-light"><b>You are Returning From =><span class="text-danger">{{optional($invoice->sr_info)->name}}</span></h4>
                 <p><span class="text-warning">যে যে প্রোডাক্ট রিটার্ন
                     করব সেগুলো রেখে বাকি গুলো ডিলিট করে দিতে হবে।</span> <span class="badge badge-danger">{{$how_many_time_returns+1}} Times Return Running</span></p>
                 </div>
