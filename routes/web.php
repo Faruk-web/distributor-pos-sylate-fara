@@ -44,6 +44,8 @@ use App\Http\Controllers\ProductVariationController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\BranchToBranchTransferController;
 use App\Http\Controllers\BranchToSRproductsTransferController;
+use App\Http\Controllers\SrToBranchTransferController;
+
 
 
 
@@ -751,6 +753,20 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/sr/product-stocks_data/{place}/{brand}', [BranchToSRproductsTransferController::class, 'stock_data']);
         Route::get('/sr/product-stocks_data_value', [BranchToSRproductsTransferController::class, 'stock_data_value']);
         
+
+
+        // Begin:: SR to branch Route ------------------------------------------------------>
+
+        //Begin:: SR To brach transfer Products
+        Route::get('/sr/transfer-products-sr-to-br', [SrToBranchTransferController::class, 'create'])->name('sr.to.br.transfer');
+        Route::get('/admin/products/sr-to-branch-transfer/search_products', [BranchToBranchTransferController::class, 'get_products_search_by_title_into_sr_to_branch_transfer']);
+        Route::post('/sr/transfer-products-sr-to-branch-confirm', [SrToBranchTransferController::class, 'store'])->name('sr.to.br.transfer.confirm');
+        Route::get('/sr/transfer-products-sr-to-branch-invoices', [SrToBranchTransferController::class, 'index'])->name('sr.to.br.transfer.index');
+        Route::get('/sr/transfer-products-sr-to-branch-invoices_data', [SrToBranchTransferController::class, 'index_data'])->name('sr.to.br.transfer.index.data');
+        // End:: SR to branch Route ------------------------------------------------------>
+
+
+
     // End:: SR Route ------------------------------------------------------>
 
 
@@ -843,7 +859,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/branch/return-products/exchange-status', [ReturnOrderController::class, 'beanch_exchange_status']);
         Route::get('/branch/return-products/search_customer', [ReturnOrderController::class, 'search_customer']);
         Route::get('/branch/return_products/search_products', [ReturnOrderController::class, 'products_search_by_title_in_customer_return']);
-        Route::get('/distributor/return_products/confirm_return', [ReturnOrderController::class, 'confirm_direct_return_to_customer'])->name('customer.direct.return.products');
+        Route::post('/distributor/return_products/confirm_return', [ReturnOrderController::class, 'confirm_direct_return_to_customer'])->name('customer.direct.return.products');
         
         Route::post('/branch/customer-return-products-confirm', [ReturnOrderController::class, 'update'])->name('customer.invoice.return.confirm');
         Route::get('/branch/customer-returned-invoices', [ReturnOrderController::class, 'returned_product_invoices'])->name('branch.customer.returned.invoices');

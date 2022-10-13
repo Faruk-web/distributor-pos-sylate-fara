@@ -47,7 +47,6 @@
 								            <label class="border-bottom">Customer Info</label><br>
 								            <p id="customer_info_output" class="font-weight-bold"></p>
 								            <input type="hidden" class="form-control" id="customer_code" value="" name="customer_code">
-								            <input type="hidden" name="customer_id" id="" class="form-control" value="" required="">
                                             <input type="hidden" name="submit_from" id="submit_from" value="">
 								        </div>
 								    </div>

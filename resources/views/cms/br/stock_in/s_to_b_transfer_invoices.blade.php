@@ -1,4 +1,3 @@
-
 @extends('cms.master')
 @section('body_content')
 
@@ -10,22 +9,26 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
 
-
+<style>
+    tr td{
+        font-size: 13px;
+    }
+</style>
 <!-- Page Content -->
 <div class="content">
     <div class="block block-rounded">
         <div class="block-header">
-            <h4 class="">Returned Invoices</h4>
+            <h4 class="">SR To Branch Product Transfer Invoices</h4>
         </div>
         <div class="block-content">
             <div class="table-responsive">
             <table class="table table-bordered data-table">
                 <thead>
                     <tr>
-                        <th>DATE</th>
-                        <th>CUSTOMER NAME</th>
-                        <th>CUSTOMER PHONE</th>
-                        <th>INV NUM.</th>
+                        <th>Date</th>
+                        <th>Sender SR</th>
+                        <th>Branch</th>
+                        <th>Inv Num.</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -35,7 +38,6 @@
             </div>
         </div>
     </div>
-    <!-- END Full Table -->
 </div>
 <!-- END Page Content -->
 
@@ -44,13 +46,13 @@
     var table = $('.data-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: "{{ route('branch.returned.invoices.data') }}",
+        ajax: "{{ route('sr.to.br.transfer.index.data') }}",
         columns: [
             {data: 'date', name: 'date'},
-            {data: 'customer_name', name: 'customer_name'},
-            {data: 'customer_phone', name: 'customer_phone'},
-            {data: 'invoice_num', name: 'invoice_num'},
-            {data: 'action', name: 'action', orderable: false, searchable: false},
+            {data: 'sr_name', name: 'sr_name'},
+            {data: 'branch', name: 'branch'},
+            {data: 'invoice', name: 'invoice'},
+            {data: 'action', name: 'action'},
         ],
         "scrollY": "300px",
         "pageLength": 100,
@@ -61,4 +63,3 @@
 
 </script>
 @endsection
-

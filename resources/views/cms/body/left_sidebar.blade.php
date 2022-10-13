@@ -344,11 +344,31 @@
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('b.to.sr.transfer')}}"><span class="nav-main-link-name">-> Transfer Branch To SR</span></a></li>
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('b.to.sr.transfer.index')}}"><span class="nav-main-link-name">-> Branch To SR Transfered Inv.</span></a></li>
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('sr.product.stock')}}"><span class="nav-main-link-name">-> SR Stock</span></a></li>
+                        <li class="nav-main-item"><a class="nav-main-link" href="{{route('sr.to.br.transfer')}}"><span class="nav-main-link-name">-> Return From SR</span></a></li>
+                        <li class="nav-main-item"><a class="nav-main-link" href="{{route('sr.to.br.transfer.index')}}"><span class="nav-main-link-name">-> SR Returned Invoice</span></a></li>
+                    </ul>
+                </li>
+                @endif
+
+                {{--
+                @if($user->hasPermissionTo('admin.branch.to.sr.transfer.products') || $user->type == 'owner')
+                <li class="nav-main-item">
+                    <a class="nav-main-link nav-main-link-submenu active" data-toggle="submenu" aria-haspopup="true"
+                        aria-expanded="false" href="#">
+                        <i class="nav-main-link-icon fab fa-goodreads"></i>
+                        <span class="nav-main-link-name">SR To Branch Transfer</span>
+                    </a>
+                    <ul class="nav-main-submenu">
+                        <li class="nav-main-item"><a class="nav-main-link" href="{{route('sr.to.br.transfer')}}"><span class="nav-main-link-name">-> Transfer SR To Branch</span></a></li>
+                        <li class="nav-main-item"><a class="nav-main-link" href="{{route('sr.to.br.transfer.index')}}"><span class="nav-main-link-name">-> SR To Branch Transfered Inv.</span></a></li>
+                        <li class="nav-main-item"><a class="nav-main-link" href="{{route('sr.product.stock')}}"><span class="nav-main-link-name">-> SR Stock</span></a></li>
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.set.opening.stock')}}"><span class="nav-main-link-name">-> Return From SR</span></a></li>
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.set.opening.stock')}}"><span class="nav-main-link-name">-> SR Returned Invoice</span></a></li>
                     </ul>
                 </li>
                 @endif
+                --}}
+
                 @if($user->hasPermissionTo('admin.set.opening.and.own.stock') || $user->type == 'owner')
                 <li class="nav-main-item">
                     <a class="nav-main-link nav-main-link-submenu active" data-toggle="submenu" aria-haspopup="true"

@@ -187,11 +187,11 @@ class ReturnOrderController extends Controller
             return Datatables::of($returned_invoices)
                 ->addIndexColumn()
                 ->addColumn('action', function($row){
-                    $actionBtn = '<a target="_blank" href="'.route('view.sold.invoice', ['invoice_id'=>$row->invoice_id]).'" class="btn btn-primary btn-sm">Main Inv</a> <a target="_blank" href="'.route('view.product.returned.invoice', ['invoice_id'=>$row->invoice_id, 'current_return_times'=>$row->return_current_times]).'" class="btn btn-info btn-sm">R Inv</a>';
+                    $actionBtn = '<a target="_blank" href="'.route('view.product.returned.invoice', ['invoice_id'=>$row->invoice_id, 'current_return_times'=>$row->return_current_times]).'" class="btn btn-primary btn-sm">Inv</a>';
                     return $actionBtn;
                 })
                 ->addColumn('customer_name', function($row){
-                    $actionBtn = $row->customer_info->name." [".$row->customer_info->code."]";
+                    $actionBtn = $row->customer_info->name." [".optional($row->customer_info->area_info)->name."]";
                     return $actionBtn;
                 })
                 ->addColumn('customer_phone', function($row){
@@ -806,7 +806,12 @@ class ReturnOrderController extends Controller
                 $total_gross = 0;
                 $date = $request->date;
                 $customer_id = $request->customer_id;
-                $customer_info = DB::table('customers')->where('id', $customer_id)->where('shop_id', $shop_id)->first(['balance', 'code', 'id', 'wallet_balance', 'wallets']);
+                $customer_info = DB::table('customers')->where('id', $customer_id)->where('shop_id', $shop_id)->first();
+                
+                $count_total = DB::table('return_orders')->where(['shop_id'=>$shop_id, 'branch_id'=>$sr_id])->count('id');
+                $update_count = $count_total+1; // here branch_id as sr_id
+                $invoice_id = 'R_'.$shop_id.'_'.$sr_id.'_'.$update_count;
+
 
                 foreach($pid as $key => $item) {
                    
@@ -861,21 +866,21 @@ class ReturnOrderController extends Controller
                         $p_data['status'] = 1; // 1 means in
                         $p_data['product_form'] = 'R';
                         $p_data['branch_id'] = $sr_id;
-                        $p_data['invoice_id'] = $trackers_info->invoice_id;
+                        $p_data['invoice_id'] = $invoice_id;
                         $p_data['note'] = "Return To Customers";
                         $p_data['created_at'] = $date;
                         $insert_product_trackers = DB::table('product_trackers')->insert($p_data);
 
-                        DB::table('order_return_porducts')->insert(['invoice_id'=>$trackers_info->invoice_id, 'return_or_exchange'=>'r', 'how_many_times_edited'=>0, 'product_id'=>$product_id, 'variation_id'=>$trackers_info->variation_id, 'quantity'=>$unit, 'price'=>$trackers_info->price, 'discount'=>$trackers_info->discount, 'discount_amount'=>$trackers_info->discount_amount, 'vat'=>$trackers_info->vat_amount, 'total_price'=>$total_price, 'created_at'=>$date]);
+                        DB::table('order_return_porducts')->insert(['invoice_id'=>$trackers_info->invoice_id, 'return_or_exchange'=>'r', 'how_many_times_edited'=>0, 'product_id'=>$product_id, 'variation_id'=>$trackers_info->variation_id, 'quantity'=>$unit, 'price'=>$trackers_info->price, 'discount'=>$trackers_info->discount, 'discount_amount'=>$trackers_info->discount_amount, 'vat'=>$trackers_info->vat, 'total_price'=>$total_price, 'created_at'=>$date]);
                             
                     }
                     else if($return_or_exchange == 'e') {
-                        DB::table('order_return_porducts')->insert(['invoice_id'=>$invoice_id, 'return_or_exchange'=>'e', 'how_many_times_edited'=>$update_count, 'product_id'=>$product_id, 'variation_id'=>$ordered_product_info->variation_id, 'quantity'=>$unit, 'price'=>$price, 'discount'=>$ordered_product_info->discount, 'discount_amount'=>$ordered_product_info->discount_amount, 'vat'=>$ordered_product_info->vat_amount, 'total_price'=>0, 'created_at'=>$current_time]);
+                        DB::table('order_return_porducts')->insert(['invoice_id'=>$invoice_id, 'return_or_exchange'=>'e', 'how_many_times_edited'=>0, 'product_id'=>$product_id, 'variation_id'=>$trackers_info->variation_id, 'quantity'=>$unit, 'price'=>$trackers_info->price, 'discount'=>$trackers_info->discount, 'discount_amount'=>$trackers_info->discount_amount, 'vat'=>$trackers_info->vat, 'total_price'=>0, 'created_at'=>$date]);
                     }
                 }
 
-                $return_customer = DB::table('return_orders')->insert(['shop_id'=>$shop_id, 'branch_id'=>$branch_id, 'invoice_id'=>$invoice_id, 'return_current_times'=>$update_count, 'customer_id'=>$customer_id, 'total_gross'=>$total_gross, 'vat_status'=>$request->vat, 'discount_status'=>$global_discount, 'discount_rate'=>$global_discount_rate,  'others_crg'=>$request->only_others_crg_tk,  'fine'=>$request->extra_fine_tk,  'refundAbleAmount'=>$request->total_payable,  'currentDue'=>$current_due,  'paid'=>0, 'date'=>$date, 'created_at'=>$date]);
-
+                $return_customer = DB::table('return_orders')->insert(['shop_id'=>$shop_id, 'branch_id'=>$sr_id, 'invoice_id'=>$invoice_id, 'return_current_times'=>0, 'customer_id'=>$customer_info->id, 'total_gross'=>$total_gross, 'vat_status'=>$trackers_info->vat, 'discount_status'=>$trackers_info->discount, 'discount_rate'=>$trackers_info->discount_amount,  'others_crg'=>0,  'fine'=>0,  'refundAbleAmount'=>$total_gross,  'currentDue'=>optional($customer_info)->balance,  'paid'=>0, 'date'=>$date, 'created_at'=>$date]);
+                return Redirect()->route('branch.customer.returned.invoices')->with('success', 'Successfully Done.');
 
             }
             else {
