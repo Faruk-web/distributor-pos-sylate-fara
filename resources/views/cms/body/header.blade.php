@@ -31,20 +31,21 @@
             @if($user->hasPermissionTo('others.sell') || $user->type == 'owner' || $user->type == 'branch_user')
             <a href="{{route('branch.sell', ['customer_code'=>0])}}" type="button" class="btn btn-sm btn-dual ml-2 bg-success mr-2 text-light d-none"><i class="fa fa-shopping-cart"></i> Sell</a>
             <a href="{{route('shop.walking.customer')}}" type="button" class="btn btn-sm btn-dual ml-2 bg-success mr-2 text-light d-none"><i class="fas fa-walking"></i> Walking</a>
-            <a href="{{route('branch.sell.new')}}" type="button" class="btn btn-sm btn-dual ml-2 bg-success mr-2 text-light"><i class="fa fa-shopping-cart"></i> SELL</a>
+            <a href="{{route('branch.sell.new')}}" type="button" class="btn btn-sm btn-dual ml-2 bg-primary mr-2 text-light">Sell Point</a>
             @endif
-            
             
             
             <h6 class="text-danger fw-bold d-none">আমরা ভার্সন  4.1 আপডেট করতেসি, এখন সফটওয়্যার ব্যবহার করা থেকে বিরত থাকুন।</h6>
 
         </div>
         <div class="d-flex align-items-center">
+            {{--
             @if($today >= $renew_date_str && !empty($renew_date) && $user->type != 'super_admin') <div class="remaining shadow rounded bg-light">!!! Your Software has been expired <b id="re_days">{{date("d M, Y", strtotime($renew_date))}}</b>. Please renew from <a target="_blank" href="shopkeeper-payment.php">here</a> !!!</b></div> @endif
             @if($user->type != 'super_admin')
             
             <a href="{{route('user.support')}}" type="button" class="btn btn-sm btn-dual ml-2 bg-primary mr-2 text-light">Support</a>
             @endif
+            --}}
             <div class="dropdown d-inline-block ml-2">
                 <button type="button" class="btn btn-sm btn-dual d-flex align-items-center"
                     id="page-header-user-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

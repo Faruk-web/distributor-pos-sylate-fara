@@ -5,8 +5,8 @@
 
     <div class="block block-rounded">
         <div class="row p-2">
-            <div class="col-md-4"><h4 class="">Product Brands</h4></div>
-            <div class="col-md-3 text-center"><a href="{{route('admin.download.exist.brand')}}" class="btn btn-rounded btn-success btn-sm">Download Exist Brand</a></div>
+            <div class="col-md-4"><h4 class="">Product Company / Brands</h4></div>
+            <div class="col-md-3 text-center"><a href="{{route('admin.download.exist.brand')}}" class="btn btn-rounded btn-success btn-sm">Download Exist Companies</a></div>
             <div class="col-md-3 text-center">
                 <div class="dropdown push">
                     <button type="button" class="btn btn-primary btn-sm dropdown-toggle" id="dropdown-content-rich-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Upload CSV</button>
@@ -23,12 +23,12 @@
                             </div>
                         </form>
                         <div class="text-center p-2 shadow rounded">
-                            <a href="{{route('download.demo.file', ['file_name'=>'brand-demo.csv'])}}" class="btn btn-rounded btn-success btn-sm">Download Demo Brand CSV</a>
+                            <a href="{{route('download.demo.file', ['file_name'=>'brand-demo.csv'])}}" class="btn btn-rounded btn-success btn-sm">Download Demo Company CSV</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-2"><button type="button" class="btn btn-rounded btn-info btn-sm push" data-toggle="modal" data-target="#modal-block-fadein">Add New Brand</button></div>
+            <div class="col-md-2"><button type="button" class="btn btn-rounded btn-info btn-sm push" data-toggle="modal" data-target="#modal-block-fadein">Add New Company</button></div>
         </div>
         <div class="block-content">
             <div class="table-responsive">
@@ -36,7 +36,7 @@
                     <thead>
                         <tr>
                             <th>SI</th>
-                            <th>Brand Name</th>
+                            <th>Company / Brand Name</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -74,7 +74,7 @@
             <form action="{{route('admin.create.brand')}}" id="form_2" method="post">
                 @csrf
                 <div class="block-header bg-primary-dark">
-                    <h3 class="block-title text-light">Add New Brand</h3>
+                    <h3 class="block-title text-light">Add New Company / Brand</h3>
                     <div class="block-options">
                         <button type="button" class="btn-block-option" data-dismiss="modal" aria-label="Close">
                             <i class="fa fa-fw fa-times"></i>
@@ -83,7 +83,7 @@
                 </div>
                 <div class="block-content font-size-sm">
                     <div class="form-group">
-                        <label for="example-text-input">Brand Name</label>
+                        <label for="example-text-input">Company / Brand Name</label>
                         <input type="text" class="form-control" id="" required name="brand_name" placeholder="Ex: Samsung">
                     </div>
                 </div>

@@ -21,10 +21,10 @@
     <div class="block block-rounded">
         <div class="p-2">
             <div class="row" id="direct-return-upper-interface">
-                <div class="col-md-3 text-center"><h4>Supplier Direct Return Product</h4></div>
+                <div class="col-md-3 text-center"><h4>Company Direct Return Product</h4></div>
                 <div class="col-md-6">
                     <div class="form-group shadow rounded p-3">
-                        <input type="text" class="form-control" id="supplier_search" placeholder="Search by supplier info"
+                        <input type="text" class="form-control" id="supplier_search" placeholder="Search by Company info"
                             name="company_name">
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                 <div class="col-md-3">
                   <div class="shadow p-2">
                     <input type="text" class="form-control form-control-sm" placeholder="Search By Product Name" id="product_title">
-                    <div class="form-group row mt-2">
+                    <div class="form-group row mt-2 d-none">
                         <div class="input-group col-md-12">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-barcode"></i></span>
@@ -86,7 +86,7 @@
                 </div>
                 </div>
                 <div class="col-md-9 p-2">
-                    <span class="text-success"><b>Supplier Direct Return Product</b></span><br>
+                    <span class="text-success"><b>Company Direct Return Product</b></span><br>
                     <div class="p-3"><div class="row p-1 shadow rounded" id="supplier-info"></div></div>
                     
                     <div class="row shadow p-2 rounded">
@@ -326,7 +326,7 @@ function setSupplier(id, name, company_name, phone, code, balance, address) {
     $('#direct-return-main-interface').show();
     $('#currentDueByCash_when_due_Minus').val(balance);
     $('#supplier_id').val(id);
-    $('#supplier-info').html('<div class="col-md-3 text-center"><small class="card-subtitle"><b>Name<br></b> '+name+'</small></div><div class="col-md-3 text-center"><small class="card-subtitle"><b>Company<br></b> '+company_name+'</small></div><div class="col-md-3 text-center"><small class="card-subtitle"><b>Address<br></b> '+address+'</small></div><div class="col-md-3 text-center"><small class="card-subtitle"><b>Phone<br></b> '+phone+'</small></div>');
+    $('#supplier-info').html('<div class="col-md-6 text-center"><small class="card-subtitle"><b>Name<br></b> '+name+'</small></div><div class="col-md-3 text-center"><small class="card-subtitle"><b>Address<br></b> '+address+'</small></div><div class="col-md-3 text-center"><small class="card-subtitle"><b>Phone<br></b> '+phone+'</small></div>');
 }
 
 

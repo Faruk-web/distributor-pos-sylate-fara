@@ -18,7 +18,7 @@
 <div class="content">
     <div class="block block-rounded">
         <div class="block-header">
-            <h4 class="">Suppliers invoices</h4>
+            <h4 class="">Companies invoices</h4>
         </div>
         <div class="block-content">
             <div class="table-responsive">
@@ -26,7 +26,7 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Supplier Info</th>
+                        <th>Company Info</th>
                         <th>Purchase Amount</th>
                         <th>Paid</th>
                         <th>Inv Num.</th>

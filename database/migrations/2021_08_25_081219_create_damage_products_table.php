@@ -20,8 +20,9 @@ class CreateDamageProductsTable extends Migration
             $table->integer('pid')->index();
             $table->integer('variation_id')->default(0)->index();
             $table->double('quantity');
-            $table->double('cartoon_quantity')->default(0);
-            $table->double('cartoon_amount')->default(0);
+            $table->string('is_cartoon')->nullable()->default(0);
+            $table->string('cartoon_quantity')->nullable()->default(0);
+            $table->string('cartoon_amount')->nullable()->default(0);
             $table->double('purchase_price');
             $table->double('selling_price');
             $table->mediumText('reason')->nullable();

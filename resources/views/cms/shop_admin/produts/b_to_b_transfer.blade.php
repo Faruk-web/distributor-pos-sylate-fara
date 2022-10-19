@@ -208,7 +208,7 @@ function myFunction(row_id, id, variation_id, variation_name, purchase_line_id, 
         document.getElementById('error').play();
     }
      else {
-        
+         
         if(is_cartoon == 1){ cartoon_text= "Max Cartoon Qty = "+cartoon_amount; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
         const cartDom = `<tr id="cart_tr`+generate_id+`">
                             <td>
@@ -312,7 +312,6 @@ function quantity_info_change(generated_id, cartoon_quantity, cartoon_amount, in
         }
     }
 }
-
 
 //product barcode to product
 $('#product_barcode_search').keypress(function(e) {

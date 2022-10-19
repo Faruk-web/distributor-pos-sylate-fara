@@ -785,12 +785,11 @@ class ProductController extends Controller
                         $type = 'simple';
                         $check = DB::table('product_trackers')->where(['product_id'=>$product->id, 'variation_id'=>0, 'branch_id'=>$stock_place, 'product_form'=>'OP'])->first(['id']);
                         if(is_null($check)) {
-                                $output .= '<li class="nav-item mb-1 p-1 rounded" id="product-item" onclick="myFunction(\''.$product->id.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->selling_price.'\', \''.$product->vat_status.'\', \''.$vat_rate.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$type.'\', 0)" title="Add me">
+                                $output .= '<li class="nav-item mb-1 p-1 rounded" id="product-item" onclick="myFunction(\''.$product->id.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->selling_price.'\', \''.$product->vat_status.'\', \''.$vat_rate.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$type.'\', 0, \''.$product->is_cartoon.'\', \''.$product->cartoon_quantity.'\')" title="Add me">
                             <a class="nav-link" id="product_text" href="javascript:void(0)">
                             <span></span>'.$product->p_name.'</small></a>
                             <div class="list-group-item d-flex justify-content-between">
                                 <small class="text-primary">Br. '.optional($brand_info)->brand_name.'</small>
-                                <small class="text-primary">'.optional($product)->is_variable.'</small>
                             </div>
                             
                         </li>';
@@ -1151,6 +1150,9 @@ class ProductController extends Controller
             foreach($pid as $key => $item) {
 
                 $unit = $request->quantity[$key];
+                $is_cartoon = $request->is_cartoon[$key];
+                $cartoon_quantity = $request->cartoon_quantity[$key];
+                $cartoon_amount = $request->cartoon_amount[$key];
                 $purchasingP = $request->price[$key];
                 $sales_price = $request->sales_price[$key];
                 $variation_id = $request->variation_id[$key];
@@ -1161,6 +1163,7 @@ class ProductController extends Controller
                 
                 $check = DB::table('product_trackers')->where(['product_id'=>$product_id, 'variation_id'=>$variation_id, 'branch_id'=>$destination_place, 'product_form'=>'OP'])->first(['id']);
                 
+
                 if(is_null($check)) {
                     
                     $totalP = $unit * $purchasingP;
@@ -1180,13 +1183,16 @@ class ProductController extends Controller
                     $purchase_line->lot_number = $lot_number;
                     $purchase_line->variation_id = $variation_id;
                     $purchase_line->quantity = $unit;
+                    $purchase_line->is_cartoon = $is_cartoon;
+                    $purchase_line->cartoon_quantity = $cartoon_quantity;
+                    $purchase_line->cartoon_amount = $cartoon_amount;
                     $purchase_line->date = $date;
                     $purchase_line->created_at = Carbon::now();
                     $purchase_line->save();
                     
                     $purchase_line_id = $purchase_line->id;
                     
-                    DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$purchase_line_id, 'lot_number'=>$lot_number, 'branch_id'=>$destination_place, 'pid'=>$product_id, 'variation_id'=>$variation_id, 'purchase_price'=>$purchasingP, 'sales_price'=>$sales_price, 'discount'=>$discount, 'discount_amount'=>$discount_amount, 'vat'=>$vat, 'stock'=>$unit, 'created_at'=>$date]);
+                    DB::table('product_stocks')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$purchase_line_id, 'lot_number'=>$lot_number, 'branch_id'=>$destination_place, 'pid'=>$product_id, 'variation_id'=>$variation_id, 'purchase_price'=>$purchasingP, 'sales_price'=>$sales_price, 'discount'=>$discount, 'discount_amount'=>$discount_amount, 'vat'=>$vat, 'stock'=>$unit, 'is_cartoon'=>$is_cartoon, 'cartoon_quantity'=>$cartoon_quantity, 'cartoon_amount'=>$cartoon_amount, 'created_at'=>$date]);
                     
                     $p_data = array();
                     $p_data['shop_id'] = $shop_id;
@@ -1198,6 +1204,9 @@ class ProductController extends Controller
                     $p_data['variation_id'] = $variation_id;
                     $p_data['product_id'] = $product_id;
                     $p_data['quantity'] = $unit;
+                    $p_data['is_cartoon'] = $is_cartoon;
+                    $p_data['cartoon_quantity'] = $cartoon_quantity;
+                    $p_data['cartoon_amount'] = $cartoon_amount;
                     $p_data['price'] = $purchasingP;
                     $p_data['discount'] = $discount;
                     $p_data['discount_amount'] = $discount_amount;

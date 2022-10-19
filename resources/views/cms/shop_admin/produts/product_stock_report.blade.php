@@ -37,7 +37,7 @@
                         <div class="form-group col-md-4">
                             
                             <select class="form-control brands" name="brands" id="brands">
-                                <option value="all">All Brands</option>
+                                <option value="all">All Companies</option>
                                 @foreach($brands as $brand)
                                     <option value="{{$brand->id}}">{{$brand->brand_name}}</option>
                                 @endforeach

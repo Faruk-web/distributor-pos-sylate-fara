@@ -57,7 +57,6 @@
                         <span class="nav-main-link-name"><span class="rounded p-1">Resellers</span></span>
                     </a>
                 </li>
-                
                 <li class="nav-main-item">
                     <a class="nav-main-link active" href="{{route('super_admin.tutorials')}}">
                         <i class="nav-main-link-icon fas fa-tv"></i>
@@ -110,12 +109,14 @@
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('reseller.active.shop')}}"><span class="nav-main-link-name">Active Shop</span></a></li>
                     </ul>
                 </li>
+                
                 <li class="nav-main-item">
                     <a class="nav-main-link active" href="{{route('super_admin.tutorials')}}">
                         <i class="nav-main-link-icon fas fa-tv"></i>
                         <span class="nav-main-link-name"><span class="rounded p-1">Tutorials</span></span>
                     </a>
                 </li>
+                
             </ul>
         </div>
     </div>
@@ -167,11 +168,13 @@
                             </a>
                         </li>
                         @endif
+                        {{--
                         <li class="nav-main-item">
                             <a class="nav-main-link" href="{{route('admin.tutorials')}}">
                                 <span class="nav-main-link-name">Tutorial</span>
                             </a>
                         </li>
+                        --}}
                         <!--<li class="nav-main-item">-->
                         <!--    <a class="nav-main-link" href="{{route('test.paul')}}">-->
                         <!--        <span class="nav-main-link-name">test</span>-->
@@ -273,7 +276,7 @@
                         </li>
                         <li class="nav-main-item">
                             <a class="nav-main-link" href="{{route('admin.product.brands')}}">
-                                <span class="nav-main-link-name">Product Brands</span>
+                                <span class="nav-main-link-name">Product Company / Brands</span>
                             </a>
                         </li>
                         <li class="nav-main-item">
@@ -374,11 +377,14 @@
                     <a class="nav-main-link nav-main-link-submenu active" data-toggle="submenu" aria-haspopup="true"
                         aria-expanded="false" href="#">
                         <i class="nav-main-link-icon fab fa-goodreads"></i>
-                        <span class="nav-main-link-name">Opening & Own Stock</span>
+                        <span class="nav-main-link-name">Opening Stock</span>
                     </a>
                     <ul class="nav-main-submenu">
+                        {{--
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.set.opening.and.own.stock')}}"><span class="nav-main-link-name">Own Stock</span></a></li>
+                        --}}
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.set.opening.stock')}}"><span class="nav-main-link-name">Opening Stock</span></a></li>
+                        
                     </ul>
                 </li>
                 @endif
@@ -536,11 +542,13 @@
                         <span class="nav-main-link-name">Purchase Return</span>
                     </a>
                     <ul class="nav-main-submenu">
+                        {{--
                         <li class="nav-main-item">
                             <a class="nav-main-link" href="{{route('supplier.stock.in.invoices.for.return')}}">
                                 <span class="nav-main-link-name">Invoice Return Product</span>
                             </a>
                         </li>
+                        --}}
                         <li class="nav-main-item">
                             <a class="nav-main-link" href="{{route('supplier.direct.return.products.new')}}">
                                 <span class="nav-main-link-name">Direct Return Product (<small class="text-success">New</small>)</span>
@@ -568,7 +576,7 @@
                 <li class="nav-main-item">
                     <a class="nav-main-link active" href="{{route('supplier.all.reports')}}">
                         <i class="nav-main-link-icon fas fa-flag-checkered"></i>
-                        <span class="nav-main-link-name">Supplier Reports</span>
+                        <span class="nav-main-link-name">Company Reports</span>
                     </a>
                 </li>
                 @endif
@@ -736,6 +744,22 @@
                 <li class="nav-main-item">
                     <a class="nav-main-link active nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
                         aria-expanded="false" href="#">
+                        <i class="nav-main-link-icon fas fa-university"></i>
+                        <span class="nav-main-link-name"> Staff </span>
+                    </a>
+                    <ul class="nav-main-submenu">
+                        <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.all.staff')}}"><span class="nav-main-link-name"> Staff List</span></a></li>
+                        <!--<li class="nav-main-item"><a class="nav-main-link" href=""><span class="nav-main-link-name">Cheque Register</span></a></li>-->
+                        <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.staff.attendance.details')}}"><span class="nav-main-link-name">Staff Attendance Details</span></a></li>
+                        
+                    </ul>
+                </li>
+                @endif
+
+                @if($user->hasPermissionTo('account.report') || $user->type == 'owner')
+                <li class="nav-main-item">
+                    <a class="nav-main-link active nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                        aria-expanded="false" href="#">
                         <i class="nav-main-link-icon fas fa-paste nav-icon"></i>
                         <span class="nav-main-link-name">Reports</span>
                     </a>
@@ -750,7 +774,6 @@
                         
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.account.cash.flow')}}"><span class="nav-main-link-name">Transaction History</span></a></li>
                         <li class="nav-main-item"><a class="nav-main-link" href="{{route('admin.account.cash.flow.diagram')}}"><span class="nav-main-link-name">Cash Flow Diagram<small class="text-success"> (New)</small></span></a></li>
-                        
                     </ul>
                 </li>
                 @endif

@@ -45,6 +45,7 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\BranchToBranchTransferController;
 use App\Http\Controllers\BranchToSRproductsTransferController;
 use App\Http\Controllers\SrToBranchTransferController;
+use App\Http\Controllers\staffController;
 
 
 
@@ -315,7 +316,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/stock/change-product-stock-info/{id}', [ProductController::class, 'change_stock_info']);
         Route::post('/stock/change_product_stock_info_confirm', [ProductController::class, 'change_stock_info_confirm'])->name('stock.change.product.stock.info.confirm');
         
-        
         //End::Admin & Branch Product stocks
 
         //Begin:: Admin Set Product Opening & Own Products stocks view
@@ -470,13 +470,21 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/supplier/product-searchby-title/direct-return', [SupplierInvReturnController::class, 'get_products_search_by_title']);
             Route::post('/supplier/direct-return/products-confirm', [SupplierInvReturnController::class, 'supplier_direct_product_return_confirm'])->name('supplier.direct.return.products.confirm');
             
-            
         //End:: Suppliers Stock In
         
-        
-        
-        
 
+        //Begin:: Staff start
+        Route::get('/admin/all-staff', [staffController::class, 'staff_index'])->name('admin.all.staff');
+        Route::get('/admin/create', [staffController::class, 'create'])->name('admin.create');
+        Route::get('/admin/all-staff-data', [staffController::class, 'staff_index_data'])->name('admin.all.staff.data');
+        Route::get('/admin/staff-data', [staffController::class, 'staff_data'])->name('admin.staff.data');
+        Route::get('/admin/edit-staff/{id}', [staffController::class, 'staff_edit'])->name('admin.edit.staff');
+        Route::post('/admin/update-staff/{id}', [staffController::class, 'staff_update']);
+        Route::get('/admin/staff/attendance-details', [staffController::class, 'staff_attendance_details'])->name('admin.staff.attendance.details');
+        Route::get('/admin/staff/attendance-details_data', [staffController::class, 'staff_attendance_details_data'])->name('admin.staff.attendance.details.data');
+        //Begin:: Staff end
+        
+        
         //Begin:: Suppliers Report
         Route::get('/supplier/supplier-all-reports', [SupplierController::class, 'supplier_report_all'])->name('supplier.all.reports');
         Route::get('/supplier/{supplier_id}/supplier-product-reports', [SupplierController::class, 'supplier_product_report'])->name('supplier.products.report');
@@ -753,8 +761,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/sr/product-stocks_data/{place}/{brand}', [BranchToSRproductsTransferController::class, 'stock_data']);
         Route::get('/sr/product-stocks_data_value', [BranchToSRproductsTransferController::class, 'stock_data_value']);
         
-
-
         // Begin:: SR to branch Route ------------------------------------------------------>
 
         //Begin:: SR To brach transfer Products

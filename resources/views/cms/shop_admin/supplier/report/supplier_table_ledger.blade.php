@@ -23,7 +23,7 @@
     <div class="block block-rounded">
         <div class="row p-3">
             <div class="col-md-8">
-                <h4 class="">Suppliers Ledger Table</h4>
+                <h4 class="">Companies Ledger Table</h4>
                 <input type="hidden" name="" id="toggle_yes" value='1'>
             </div>
             <div class="col-md-3 hidden-print">

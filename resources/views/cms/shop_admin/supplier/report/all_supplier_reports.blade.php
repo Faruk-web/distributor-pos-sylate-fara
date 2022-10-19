@@ -6,14 +6,14 @@
 <div class="content">
     <div class="block block-rounded">
         <div class="block-header">
-            <h4 class="">Product Supplier Reports</h4>
+            <h4 class="">Product Company Reports</h4>
         </div>
         <div class="block-content">
             <div class="table-responsive">
                 <table id="example1" class="display table table-bordered table-striped table-vcenter" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Supplier Name</th>
+                            <th>Company Name</th>
                             <th>Company Name</th>
                             <th>Phone</th>
                             <th>Address</th>

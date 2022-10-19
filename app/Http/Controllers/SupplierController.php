@@ -748,7 +748,7 @@ class SupplierController extends Controller
             $output .= '<table id="" class="table table-bordered" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Supplier Info</th>
+                                <th>Company Info</th>
                                 <th>Invoice Total</th>
                                 <th>Instant Paid</th>
                                 <th>Others Paid</th>
@@ -795,7 +795,7 @@ class SupplierController extends Controller
                                 <th class="text-center mb-0 bg-dark" colspan="7"><h4 class="text-light mb-0">'.date("d M, Y", strtotime($first_date)).' To '.date("d M, Y", strtotime($last_date)).' Suppliers Ledger Table</h4></th>
                             </tr>
                             <tr>
-                                <th>Supplier Info</th>
+                                <th>Company Info</th>
                                 <th>Invoice Total</th>
                                 <th>Instant Paid</th>
                                 <th>Others Paid</th>

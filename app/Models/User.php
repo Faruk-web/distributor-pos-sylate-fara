@@ -16,6 +16,9 @@ use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
+use App\Models\StaffInOutDetails;
+use App\Models\StaffDailyAttendence;
+
 
 
 class User extends Authenticatable
@@ -133,6 +136,74 @@ class User extends Authenticatable
     public function area_info() {
       return $this->belongsTo(Area::class, 'sr_area_id');
     }
+
+
+    public static function addAttendance() {
+      $shop_id = Auth::user()->shop_id;
+      $shop_settings = DB::table('shop_settings')->where('shop_code', $shop_id)->first();
+      
+      $date = date("Y-m-d");
+      $data = array("operation" => "fetch_log","auth_user" =>optional($shop_settings)->attendence_api_auth_user, "auth_code"=> optional($shop_settings)->attendence_api_auth_code, "start_date" => $date, "end_date" =>$date, "start_time" => "01:01:01", "end_time" => "24:60:00");
+
+      $datapayload = json_encode($data);
+      $api_request = curl_init('https://rumytechnologies.com/rams/json_api');
+      curl_setopt($api_request, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($api_request, CURLINFO_HEADER_OUT, true);
+      curl_setopt($api_request, CURLOPT_POST, true);
+      curl_setopt($api_request, CURLOPT_POSTFIELDS, $datapayload);
+      curl_setopt($api_request, CURLOPT_HTTPHEADER, array('Content-Type:
+      application/json','Content-Length: ' . strlen($datapayload)));
+      $result = curl_exec($api_request);
+      $replace_syntax = str_replace('{"log":',"",$result);
+      //print_r($replace_syntax);
+      $replace_syntax = substr($replace_syntax, 0, -1);
+      //print_r($replace_syntax);
+      $json_data = json_decode($replace_syntax);
+
+      
+      if($json_data < 1) {
+        return 0;
+      }
+
+      //dd($json_data);
+
+      foreach ($json_data as $data) {
+          $check_staff = User::find($data->registration_id);
+          
+          if(!is_null($check_staff)) {
+              $check_details = StaffInOutDetails::Where(['shop_id'=>$shop_id, 'staff_id'=>$data->registration_id, 'date'=>$data->access_date, 'time'=>$data->access_time])->first('id');
+              
+              if(is_null($check_details)) {
+                  $staff_details = new StaffInOutDetails;
+                  $staff_details->shop_id = $shop_id;
+                  $staff_details->staff_id = $data->registration_id;
+                  $staff_details->date = $data->access_date;
+                  $staff_details->time = $data->access_time;
+                  $staff_details->access_id = $data->access_id;
+                  $staff_details->save();
+                  
+                  $check_in_log = StaffDailyAttendence::Where(['shop_id'=>$shop_id, 'staff_id'=>$check_staff->id, 'date'=>$data->access_date])->first();
+                  if(!is_null($check_in_log)) {
+                      if($check_in_log->in_time != $data->access_time) {
+                          $check_in_log->out_time = $data->access_time;
+                          $check_in_log->update();
+                      }
+                  }
+                  else {
+                      $new_check_in_log = new StaffDailyAttendence;
+                      $new_check_in_log->shop_id = $shop_id;
+                      $new_check_in_log->staff_id = $check_staff->id;
+                      $new_check_in_log->date = $data->access_date;
+                      $new_check_in_log->in_time = $data->access_time;
+                      $new_check_in_log->save();
+                      
+                  }
+              }
+          }
+          
+      }
+      
+  }
     
 
 

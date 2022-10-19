@@ -238,7 +238,6 @@ class DamageProductController extends Controller
         }
     }
 
-
     public function admin_add_damage_godown_and_branch_stock_info(Request $request) {
         $pid = $request->pid;
         $place = $request->place;
@@ -256,6 +255,7 @@ class DamageProductController extends Controller
                                   <th width="45%">Info</th>
                                   <th>Stock Qty</th>
                                   <th>Damage Qty</th>
+                                  <th>Damage In Cartoon</th>
                                 </tr>
                               </thead>
                               <tbody id="damage_tbody>';
@@ -313,9 +313,10 @@ class DamageProductController extends Controller
                                 <table class="table table-bordered">
                                   <thead>
                                     <tr class="bg-success text-light">
-                                      <th width="45%">Info</th>
+                                      <th width="35%">Info</th>
                                       <th>Stock Qty</th>
                                       <th>Damage Qty</th>
+                                      <th>Damage In Cartoon</th>
                                     </tr>
                                   </thead>
                                   <tbody id="damage_tbody>';
@@ -326,9 +327,15 @@ class DamageProductController extends Controller
                                         $variation_name =  ' ('.optional($variation_info)->list_title.')';
                                     }
                                     $generate_id = $stock->pid.$stock->id;
+                                    $cartoon_status = '';
+                                    $cartoon_text = '';
+                                    if($stock->is_cartoon == 1){ $cartoon_text= "Max = ".$stock->cartoon_amount." Cartoon<br>1 Cartoon = ".$stock->cartoon_quantity; }else {  $cartoon_status = 'readonly'; $cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
                                 $output .='<tr id="cart_tr'.$generate_id.'">
                                               <td>
                                                   <input type="hidden" name="pid[]" value="'.$stock->pid.'">
+                                                  <input type="hidden" name="is_cartoon[]" value="'.$stock->is_cartoon.'">
+                                                  <input type="hidden" name="cartoon_quantity[]" value="'.$stock->cartoon_quantity.'">
+                                                    
                                                   <input type="hidden" name="lot_number[]" value="'.$stock->lot_number.'">
                                                   <input type="hidden" name="variation_id[]" value="'.$stock->variation_id.'">
                                                   <input type="hidden" name="database_id[]" value="'.$stock->id.'">
@@ -339,8 +346,14 @@ class DamageProductController extends Controller
                                                   <input type="number" step="any" value="'.$stock->stock.'" class="form-control" readonly="" id="stock_qty" max="" name="stock_qty[]">
                                               </td>
                                               <td>
-                                                <input type="number" step="any" value="" class="form-control" required id="damage_qty" max="'.$stock->stock.'" name="damage_qty[]">
+                                                <input type="number" step="any" value="" class="form-control quantity'.$generate_id.'" required id="damage_qty" max="'.$stock->stock.'" oninput="changeQuantity(\''.$generate_id.'\', \''.optional($stock)->is_cartoon.'\', \''.optional($stock)->cartoon_quantity.'\')" name="damage_qty[]">
                                                 <small class="text-danger">এই লট থেকে ড্যামেজ না দেখাতে চাইলে 0 দিন</small>
+                                              </td>
+                                              <td>
+                                                <div class="">
+                                                    <input type="number" class="form-control cartoon_amount cartoon_amount'.$generate_id.'" value="0" id="cartoon_amount" '.$cartoon_status.' oninput="change_cartoon_amount(\''.$generate_id.'\', \''.optional($stock)->is_cartoon.'\', \''.optional($stock)->cartoon_quantity.'\')" name="cartoon_amount[]" step="any" required>
+                                                    <small>'.$cartoon_text.'</small>
+                                                </div>
                                               </td>
                                             </tr>';
                                   }
@@ -385,6 +398,8 @@ class DamageProductController extends Controller
             foreach($pid as $key => $item) {
                 $product_id = $pid[$key];
                 $damage_qty = $request->damage_qty[$key];
+                $cartoon_amount = $request->cartoon_amount[$key];
+                
                 $database_id = $request->database_id[$key];
                 $product_check = Product_stock::Where(['pid'=>$product_id, 'id'=>$database_id])->first();
                 if(!is_null($product_check) && $damage_qty > 0 && optional($product_check)->stock > 0) {
@@ -399,9 +414,9 @@ class DamageProductController extends Controller
                     
                     $total_price_of_damage = $final_damage_qty * $product_check->purchase_price;
                    
-                   DB::table('product_trackers')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_check->purchase_line_id, 'lot_number'=>$product_check->lot_number, 'purchase_price'=>$product_check->purchase_price, 'total_purchase_price'=>$product_check->purchase_price*$final_damage_qty, 'sales_price'=>$product_check->sales_price, 'variation_id'=>$product_check->variation_id, 'branch_id'=>$place, 'product_id'=>$product_check->pid, 'quantity'=>$final_damage_qty, 'price'=>$product_check->purchase_price, 'discount'=>$product_check->discount, 'discount_amount'=>$product_check->discount_amount, 'vat'=>$product_check->vat, 'total_price'=>$total_price_of_damage, 'status'=>0, 'product_form'=>'DM', 'invoice_id'=>'DM', 'note'=>$request->reason, 'created_at'=>$date]);
+                   DB::table('product_trackers')->insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_check->purchase_line_id, 'lot_number'=>$product_check->lot_number, 'purchase_price'=>$product_check->purchase_price, 'total_purchase_price'=>$product_check->purchase_price*$final_damage_qty, 'sales_price'=>$product_check->sales_price, 'variation_id'=>$product_check->variation_id, 'branch_id'=>$place, 'product_id'=>$product_check->pid, 'quantity'=>$final_damage_qty, 'is_cartoon'=>optional($product_check)->is_cartoon, 'cartoon_quantity'=>optional($product_check)->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount, 'price'=>$product_check->purchase_price, 'discount'=>$product_check->discount, 'discount_amount'=>$product_check->discount_amount, 'vat'=>$product_check->vat, 'total_price'=>$total_price_of_damage, 'status'=>0, 'product_form'=>'DM', 'invoice_id'=>'DM', 'note'=>$request->reason, 'created_at'=>$date]);
                    
-                   Damage_product::insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_check->purchase_line_id, 'lot_number'=>$product_check->lot_number, 'branch_id'=>$place, 'pid'=>$product_id, 'variation_id'=>$product_check->variation_id, 'quantity'=>$final_damage_qty, 'purchase_price'=>$product_check->purchase_price, 'selling_price'=>$product_check->sales_price, 'discount'=>$product_check->discount, 'discount_amount'=>$product_check->discount_amount, 'vat'=>$product_check->vat, 'reason'=>$request->reason, 'date'=>$date, 'created_by'=>Auth::user()->id]);
+                   Damage_product::insert(['shop_id'=>$shop_id, 'purchase_line_id'=>$product_check->purchase_line_id, 'lot_number'=>$product_check->lot_number, 'branch_id'=>$place, 'pid'=>$product_id, 'variation_id'=>$product_check->variation_id, 'quantity'=>$final_damage_qty, 'is_cartoon'=>optional($product_check)->is_cartoon, 'cartoon_quantity'=>optional($product_check)->cartoon_quantity, 'cartoon_amount'=>$cartoon_amount, 'purchase_price'=>$product_check->purchase_price, 'selling_price'=>$product_check->sales_price, 'discount'=>$product_check->discount, 'discount_amount'=>$product_check->discount_amount, 'vat'=>$product_check->vat, 'reason'=>$request->reason, 'date'=>$date, 'created_by'=>Auth::user()->id]);
                    
                    $rest_stock = $db_stock - $final_damage_qty;
                    
@@ -411,6 +426,10 @@ class DamageProductController extends Controller
                    else {
                        $update_product_item = $product_check;
                        $update_product_item->stock = $rest_stock;
+                       if($product_check->is_cartoon == 1) {
+                            $rest_cartoon_amount = $product_check->cartoon_amount - $cartoon_amount;
+                            $update_product_item->cartoon_amount = $rest_cartoon_amount;
+                       }
                        $update_product_item->update();
                    }
                 }

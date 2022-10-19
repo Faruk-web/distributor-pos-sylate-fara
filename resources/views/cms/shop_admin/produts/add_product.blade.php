@@ -23,9 +23,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="example-text-input-alt">Product Brand</label>
+                                <label for="example-text-input-alt">Product Company / Brand</label>
                                 <select id="" name="p_brand" class="form-control select1" data-live-search="true">
-                                    <option value="">-- Select Brand --</option>
+                                    <option value="">-- Select Company / Brand --</option>
                                     @foreach($brands as $brand)
                                     <option value="{{$brand->id}}">{{$brand->brand_name}}</option>
                                     @endforeach

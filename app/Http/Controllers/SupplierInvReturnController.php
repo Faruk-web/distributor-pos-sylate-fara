@@ -289,7 +289,6 @@ class SupplierInvReturnController extends Controller
         }
     }
     
-
     //End:: get products from barcode for supplier direct return
     
     //Start:: get products from barcode for supplier direct return New
@@ -336,7 +335,7 @@ class SupplierInvReturnController extends Controller
                         $variation_title = optional($variation_info)->list_title;
                     }
                     $unit_type_info = DB::table('unit_types')->where('id', $product->p_unit_type)->first(['unit_name']);
-                    $output .= '<li class="nav-item mb-1 p-1 rounded" id="product_text" onclick="myFunction(\''.$product->pid.'\', \''.$product->variation_id.'\', \''.$variation_title.'\', \''.$product->purchase_line_id.'\', \''.$product->lot_number.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->sales_price.'\', \''.$product->vat.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$product->stock.'\', \''.optional($unit_type_info)->unit_name.'\', \''.$product->id.'\')" title="Add me">
+                    $output .= '<li class="nav-item mb-1 p-1 rounded" id="product_text" onclick="myFunction(\''.$product->pid.'\', \''.$product->variation_id.'\', \''.$variation_title.'\', \''.$product->purchase_line_id.'\', \''.$product->lot_number.'\', \''.$product->p_name.'\', \''.$product->purchase_price.'\', \''.$product->sales_price.'\', \''.$product->vat.'\', \''.$product->discount.'\', \''.$product->discount_amount.'\', \''.$product->stock.'\', \''.optional($unit_type_info)->unit_name.'\', \''.$product->id.'\', \''.$product->is_cartoon.'\', \''.$product->cartoon_quantity.'\', \''.$product->cartoon_amount.'\')" title="Add me">
                         <h6 class="text-success">'.$product->p_name.' '.$variation_name.'</h6>
                         <span><b>Brand:</b> '.optional($brand_info)->brand_name.', <b class="text-danger">Lot Number:</b> '.$product->lot_number.', <b>Sales Price:</b> '.$product->sales_price.', <b>Discount:</b> '.$product->discount.'('.$product->discount_amount.'), <b>VAT:</b> '.$product->vat.'%</span>
                         <br><span class="text-danger"><b>Stock Unit:</b> '.$product->stock.' '.optional($unit_type_info)->unit_name.'</span>

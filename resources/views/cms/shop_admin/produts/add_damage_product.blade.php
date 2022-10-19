@@ -53,7 +53,6 @@
             <label for="">Select Place</label>
             <select class="form-control" name="place" id="select_place">
             <option value="">-- Select --</option>
-            <option value="G">Godown</option>
             @foreach($branches as $branch)
             <option value="{{$branch->id}}">{{$branch->branch_name}} [{{$branch->branch_address}}]</option>
             @endforeach
@@ -121,6 +120,35 @@
     });
 
  
+function changeQuantity(generated_id, is_cartoon, cartoon_quantity) {
+    quantity_info_change(generated_id, is_cartoon, cartoon_quantity, 'single_qty');
+    
+}
+
+function change_cartoon_amount(generated_id, is_cartoon, cartoon_quantity) {
+    quantity_info_change(generated_id, is_cartoon, cartoon_quantity, 'cartoon_qty');
+}
+
+function quantity_info_change(generated_id, is_cartoon, cartoon_quantity, info) {
+    if(info == 'single_qty') {
+        if(cartoon_quantity > 0) {
+            var qty = $('.quantity'+generated_id).val();
+            var total_cartoon = qty / cartoon_quantity;
+            $('.cartoon_amount'+generated_id).val(total_cartoon.toFixed(2));
+        }
+    }
+    else if(info == 'cartoon_qty') {
+        if(cartoon_quantity > 0) {
+            var cartoon_qty = $('.cartoon_amount'+generated_id).val();
+            var total_qty = cartoon_quantity * cartoon_qty;
+            $('.quantity'+generated_id).val(total_qty.toFixed(2));
+        }
+    }
+}
+
+
+
+
 $("form").bind("keypress", function (e) {
     if (e.keyCode == 13) {
         return false;

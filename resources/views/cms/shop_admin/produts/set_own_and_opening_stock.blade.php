@@ -92,7 +92,6 @@
                         <label for="place"><span class="text-danger">*</span>Select Place</label>
                         <select class="form-control" name="place" required="" id="stock_place">
                             <option value="0">-- Select Place --</option>
-                            <option value="G">Godown</option>
                             @foreach($branchs as $branch)
                             <option value="{{$branch->id}}">{{$branch->branch_name}} [{{$branch->branch_address}}]</option>
                             @endforeach
@@ -113,8 +112,9 @@
                                                 <tr class="bg-warning text-light">
                                                     <th style="padding: 10px 7px; width: 40%;">Product Info</th>
                                                     <th style=" width: 15%;padding: 10px 7px;">Quantity</th>
+                                                    <th style=" width: 15%;padding: 10px 7px;">	CARTOON QTY</th>
                                                     <th style="padding: 10px 7px;">P Price</th>
-                                                    <th style="padding: 10px 7px;">Action</th>
+                                                    <th style="padding: 10px 7px; text-align:center;">X</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="demo" class="demo"></tbody>
@@ -241,9 +241,9 @@
 var pname = [];
 
 
-function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, discount_rate, variation_name,variation_id) {
+function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, discount_rate, variation_name,variation_id, is_cartoon, cartoon_quantity) {
     var x = document.getElementsByClassName("quantity");
-    var flat_d_status, p_d_status  = '';
+    var flat_d_status, p_d_status, cartoon_status, cartoon_text  = '';
     var variation_info = '';
     if(variation_name == 'simple') { var generate_id = id; } else { var generate_id = id+'_'+variation_id; variation_info = '<small class="text-success">('+variation_name+')</small>' }
     if(vat_status != 'yes'){ vat_rate = 0; }
@@ -258,10 +258,12 @@ function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, di
         document.getElementById('error').play();
     }
     else {
-        
+        if(is_cartoon == 1){ cartoon_text= "1 Cartoon = "+cartoon_quantity; }else {  cartoon_status = 'readonly'; cartoon_text = "<span class='text-danger'>Status is deactive.</span>"; }
         const cartDom = `<tr id="cart_tr`+generate_id+`">
                             <td>
                                 <input type="hidden" name="pid[]" value="`+id+`">
+                                <input type="hidden" name="is_cartoon[]" value="`+is_cartoon+`">
+                                <input type="hidden" name="cartoon_quantity[]" value="`+cartoon_quantity+`">
                                 <input type="hidden" name="variation_id[]" value="`+variation_id+`">
                                 <input type="hidden" id="check_id`+generate_id+`" value="`+generate_id+`">
                                 <h5 class="fw-bold mb-0">`+name+` `+variation_info+` <i class="fa fa-plus plus_icon ml-2" data-toggle="modal" data-target="#cart_modal_`+generate_id+`"></i></h5>
@@ -270,8 +272,8 @@ function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, di
                                 <div class="modal fade text-left show" id="cart_modal_`+generate_id+`" tabindex="-1" role="dialog" aria-labelledby="cart_modal_level_`+generate_id+`" aria-modal="true">
                                     <div class="modal-dialog modal-dialog-scrollable" role="document">
                                         <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title fw-bold" id="cart_modal_level_`+generate_id+`">`+name+` `+variation_info+`</h5>
+                                            <div class="modal-header bg-dark text-light">
+                                                <h5 class="modal-title fw-bold text-light" id="cart_modal_level_`+generate_id+`">`+name+` `+variation_info+`</h5>
                                             </div>
                                             <div class="modal-body">
                                                 <div class="row">
@@ -304,9 +306,19 @@ function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, di
                                     </div>
                                 </div>
                             </td>
+                            
                             <td>
-                                <input style="width:117px;" type="number" value="1" id="quantity" oninput="changeQuantity()" name="quantity[]" class="quantity" step="any">
+                                <div class="mb-2 p-1 border rounded shadow">
+                                    <input style="width:117px;" type="number" class="quantity quantity`+generate_id+`" value="" id="quantity" oninput="changeQuantity('`+generate_id+`', '`+cartoon_quantity+`')" name="quantity[]" step="any" required>
+                                </div>
                             </td>
+                            <td>
+                                <div class="mb-2 p-1 border rounded shadow">
+                                    <input style="width:117px;" type="number" class="cartoon_amount cartoon_amount`+generate_id+`" value="0" id="cartoon_amount" `+cartoon_status+` oninput="change_cartoon_amount('`+generate_id+`', '`+cartoon_quantity+`')" name="cartoon_amount[]" step="any" required>
+                                    <br><small>`+cartoon_text+`</small>
+                                </div>
+                            </td>
+
                             <td>
                                 <input style="width: 111px;" type="number" value="`+price+`" id="price" oninput="change_price()" name="price[]" class="pricesum" step="any">
                             </td>
@@ -319,8 +331,35 @@ function myFunction(id,name,price,sales_price,vat_status, vat_rate, discount, di
         multiply();
        document.getElementById('success1').play(); 
     }
+}
+
+
+function changeQuantity(generated_id, cartoon_quantity) {
+    quantity_info_change(generated_id, cartoon_quantity, 'single_qty');
     
 }
+
+function change_cartoon_amount(generated_id, cartoon_quantity) {
+    quantity_info_change(generated_id, cartoon_quantity, 'cartoon_qty');
+}
+
+function quantity_info_change(generated_id, cartoon_quantity, info) {
+    if(info == 'single_qty') {
+        if(cartoon_quantity > 0) {
+            var qty = $('.quantity'+generated_id).val();
+            var total_cartoon = qty / cartoon_quantity;
+            $('.cartoon_amount'+generated_id).val(total_cartoon.toFixed(2));
+        }
+    }
+    else if(info == 'cartoon_qty') {
+        if(cartoon_quantity > 0) {
+            var cartoon_qty = $('.cartoon_amount'+generated_id).val();
+            var total_qty = cartoon_quantity * cartoon_qty;
+            $('.quantity'+generated_id).val(total_qty.toFixed(2));
+        }
+    }
+}
+
 
 function remove_cart_tr(generated_id) {
     $('#cart_tr'+generated_id).remove();
